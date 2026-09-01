@@ -12,7 +12,10 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // Config/JS files aren't in tsconfig; let the service handle them.
+          allowDefaultProject: ['*.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -27,6 +30,11 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
     },
+  },
+  // JS config files don't get type-aware linting.
+  {
+    files: ['**/*.js'],
+    ...tseslint.configs.disableTypeChecked,
   },
   // Keep ESLint out of Prettier's lane — must stay last.
   prettier,
