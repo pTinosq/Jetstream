@@ -25,6 +25,17 @@ auth** for now (it's behind the host's own access). Ships as one deployable;
 - **Airport data:** OurAirports open dataset (public domain) seeded into SQLite;
   airport code → coordinates resolved locally, fully offline.
 
+## Data model
+
+- **`airports`** — seeded reference data (coords, codes, IANA `timezone`).
+- **`trips`** — optional grouping of legs into one journey (LHR→DXB→SYD).
+- **`flights`** — one leg (takeoff→landing); FK to origin/destination airports
+  and an optional `trip_id` (+ `sequence` for ordering within a trip).
+  - Times (`departure`, `arrival`) are **ISO 8601 strings with UTC offset** —
+    pins local wall-clock + DST without a separate tz lookup. `arrival` optional.
+  - **Upcoming vs flown is derived** from `departure`, never stored.
+- Migrations live in `drizzle/`; change `schema.ts` then `npm run db:generate`.
+
 ## Commands
 
 | Task          | Command             |
@@ -43,7 +54,9 @@ Always run `npm run check` before considering a change done. It runs
 type-check (`svelte-check`), lint, format-check, and tests.
 
 Database (Drizzle): `npm run db:push` (sync schema in dev), `db:generate`
-(create a migration), `db:migrate` (apply migrations), `db:studio` (browse).
+(create a migration), `db:migrate` (apply migrations), `db:studio` (browse),
+`db:seed` (load airports — accepts a CLI path/URL or `AIRPORTS_CSV`, defaults
+to the public OurAirports dataset).
 
 ## Stack
 
@@ -92,6 +105,10 @@ local scopes when clearer. `async`/`await` preferred over `.then()` chains;
 - Conventional Commits (`feat:` / `fix:` / `chore:` / `refactor:` / `test:` …).
 - Work on feature branches; PR into `main`. `npm run check` must pass before
   commit.
+- **Commit and push continually as you build** — many small, focused commits
+  per PR, each a coherent step, pushed as they land. Aim for a clean, readable
+  git history that tells the story of the feature; don't batch a whole feature
+  into one giant commit.
 
 ## Working agreement
 
