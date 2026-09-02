@@ -87,7 +87,8 @@ contract is genuinely subtle.
 in `src/lib/` (imported via the `$lib` alias), server-only code in
 `src/lib/server/` (never imported by client). Group `src/lib/` by feature/domain,
 each holding its logic, types, and `*.test.ts` together. Named exports only.
-Relative imports include the `.ts` extension.
+_Relative_ imports include the `.ts` extension; `$lib` alias imports omit it
+(aliased paths aren't rewritten on emit).
 
 **Style** — Immutability preferred for shared/returned data; mutate freely in
 local scopes when clearer. `async`/`await` preferred over `.then()` chains;
