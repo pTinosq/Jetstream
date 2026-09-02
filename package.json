@@ -52,7 +52,9 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "@photostructure/tz-lookup": "^11.6.1",
     "better-sqlite3": "^13.0.2",
+    "csv-parse": "^7.0.2",
     "zod": "^4.0.0"
   }
 }
