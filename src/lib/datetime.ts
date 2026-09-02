@@ -58,3 +58,15 @@ export function toIsoWithOffset(local: string, timeZone: string): string {
   const probe = new Date(`${withSeconds}Z`);
   return `${withSeconds}${formatOffset(offsetMinutes(timeZone, probe))}`;
 }
+
+/**
+ * Render a stored ISO-with-offset string as "YYYY-MM-DD HH:mm", preserving the
+ * airport-local wall-clock time rather than converting to the viewer's zone.
+ */
+export function formatWallClock(iso: string): string {
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/.exec(iso);
+  if (match === null) return iso;
+  const [, date, time] = match;
+  if (date === undefined || time === undefined) return iso;
+  return `${date} ${time}`;
+}

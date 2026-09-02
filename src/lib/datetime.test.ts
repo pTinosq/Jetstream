@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { toIsoWithOffset } from './datetime.ts';
+import { toIsoWithOffset, formatWallClock } from './datetime.ts';
 
 test('applies a zero offset for UTC', () => {
   expect(toIsoWithOffset('2026-03-01T09:00', 'UTC')).toBe('2026-03-01T09:00:00+00:00');
@@ -23,4 +23,12 @@ test('handles half-hour offsets (India)', () => {
 
 test('rejects a malformed local datetime', () => {
   expect(() => toIsoWithOffset('not-a-date', 'UTC')).toThrow();
+});
+
+test('formats a stored ISO string to airport-local wall clock', () => {
+  expect(formatWallClock('2026-03-01T20:15:00+04:00')).toBe('2026-03-01 20:15');
+});
+
+test('returns the input unchanged when it is not an ISO datetime', () => {
+  expect(formatWallClock('n/a')).toBe('n/a');
 });
