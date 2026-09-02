@@ -48,3 +48,15 @@ test('rejects an unknown cabin class', () => {
   const result = flightInputSchema.safeParse({ ...base, cabinClass: 'platinum' });
   expect(result.success).toBe(false);
 });
+
+test('treats omitted optional fields as null', () => {
+  const result = flightInputSchema.parse({
+    originId: 'lhr',
+    destinationId: 'dxb',
+    departure: '2026-03-01T09:00',
+  });
+  expect(result.arrival).toBeNull();
+  expect(result.airline).toBeNull();
+  expect(result.aircraftRegistration).toBeNull();
+  expect(result.cabinClass).toBeNull();
+});
