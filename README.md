@@ -47,6 +47,13 @@ before every commit.
 Copy `.env.example` to `.env`. `DATABASE_URL` points at the SQLite file
 (defaults to `local.db`).
 
+First-time setup — create the schema and load airport reference data:
+
+```sh
+npm run db:migrate   # create tables
+npm run db:seed      # load airports (OurAirports; offline: db:seed ./airports.csv)
+```
+
 ## License
 
 TBD.

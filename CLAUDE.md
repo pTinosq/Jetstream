@@ -54,7 +54,9 @@ Always run `npm run check` before considering a change done. It runs
 type-check (`svelte-check`), lint, format-check, and tests.
 
 Database (Drizzle): `npm run db:push` (sync schema in dev), `db:generate`
-(create a migration), `db:migrate` (apply migrations), `db:studio` (browse).
+(create a migration), `db:migrate` (apply migrations), `db:studio` (browse),
+`db:seed` (load airports — accepts a CLI path/URL or `AIRPORTS_CSV`, defaults
+to the public OurAirports dataset).
 
 ## Stack
 
