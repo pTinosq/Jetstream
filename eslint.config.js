@@ -1,41 +1,67 @@
-// @ts-check
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import path from 'node:path';
+import js from '@eslint/js';
+import svelte from 'eslint-plugin-svelte';
+import { defineConfig, includeIgnoreFile } from 'eslint/config';
+import globals from 'globals';
+import ts from 'typescript-eslint';
 
-export default tseslint.config(
-  {
-    ignores: ['dist/**', 'node_modules/**'],
-  },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
+const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
+
+export default defineConfig(
+  includeIgnoreFile(gitignorePath),
+  js.configs.recommended,
+  ts.configs.recommendedTypeChecked,
+  svelte.configs.recommended,
+  prettier,
+  svelte.configs.prettier,
   {
     languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
       parserOptions: {
-        projectService: {
-          // Config/JS files aren't in tsconfig; let the service handle them.
-          allowDefaultProject: ['*.js'],
-        },
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
-      // Nudge toward clean code without being noisy.
+      // typescript-eslint owns undef checking on TS projects.
+      'no-undef': 'off',
+
+      // Clean-code nudges.
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/consistent-type-imports': 'error',
-      'no-console': 'off',
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
+
+      // No type escapes — use `unknown` + narrowing, validate at boundaries.
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/strict-boolean-expressions': 'error',
     },
   },
-  // JS config files don't get type-aware linting.
   {
-    files: ['**/*.js'],
-    ...tseslint.configs.disableTypeChecked,
+    files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        extraFileExtensions: ['.svelte'],
+        parser: ts.parser,
+      },
+    },
+    rules: {
+      // Runes ($props/$state) must be declared with `let`, so prefer-const
+      // is a false positive in Svelte components.
+      'prefer-const': 'off',
+    },
   },
-  // Keep ESLint out of Prettier's lane — must stay last.
-  prettier,
+  // Config / tooling files aren't part of the app's TS program — no type-aware
+  // linting (framework-typed `any`s legitimately leak into these).
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.config.ts'],
+    ...ts.configs.disableTypeChecked,
+  },
 );

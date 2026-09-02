@@ -1,22 +1,25 @@
-# Dependencies
-node_modules/
+node_modules
 
-# Build output
-dist/
-*.tsbuildinfo
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
 
-# Logs
-*.log
-npm-debug.log*
+# OS
+.DS_Store
+Thumbs.db
 
-# Environment
+# Env
 .env
 .env.*
 !.env.example
+!.env.test
 
-# OS / editor
-.DS_Store
-.idea/
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+# SQLite
+*.db

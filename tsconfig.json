@@ -1,39 +1,22 @@
 {
+  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    // Modern output aligned with Node 22+.
-    "target": "ES2023",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2023"],
-
-    // Emit.
-    "outDir": "dist",
-    "rootDir": "src",
+    "rewriteRelativeImportExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
-    "declaration": true,
-
-    // Strictness — the whole point of a clean harness.
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // Allow `.ts` in relative imports (required for Node's native TS execution)
-    // and rewrite them to `.js` on `tsc` build.
-    "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-
-    // Interop / ergonomics.
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "skipLibCheck": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+    "moduleResolution": "bundler"
+  }
+  // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+  // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
+  //
+  // To make changes to top-level options such as include and exclude, we recommend extending
+  // the generated config; see https://svelte.dev/docs/kit/configuration#typescript
 }
