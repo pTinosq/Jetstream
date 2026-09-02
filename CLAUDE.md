@@ -103,6 +103,10 @@ local scopes when clearer. `async`/`await` preferred over `.then()` chains;
 - Conventional Commits (`feat:` / `fix:` / `chore:` / `refactor:` / `test:` …).
 - Work on feature branches; PR into `main`. `npm run check` must pass before
   commit.
+- **Commit and push continually as you build** — many small, focused commits
+  per PR, each a coherent step, pushed as they land. Aim for a clean, readable
+  git history that tells the story of the feature; don't batch a whole feature
+  into one giant commit.
 
 ## Working agreement
 
