@@ -25,6 +25,17 @@ auth** for now (it's behind the host's own access). Ships as one deployable;
 - **Airport data:** OurAirports open dataset (public domain) seeded into SQLite;
   airport code → coordinates resolved locally, fully offline.
 
+## Data model
+
+- **`airports`** — seeded reference data (coords, codes, IANA `timezone`).
+- **`trips`** — optional grouping of legs into one journey (LHR→DXB→SYD).
+- **`flights`** — one leg (takeoff→landing); FK to origin/destination airports
+  and an optional `trip_id` (+ `sequence` for ordering within a trip).
+  - Times (`departure`, `arrival`) are **ISO 8601 strings with UTC offset** —
+    pins local wall-clock + DST without a separate tz lookup. `arrival` optional.
+  - **Upcoming vs flown is derived** from `departure`, never stored.
+- Migrations live in `drizzle/`; change `schema.ts` then `npm run db:generate`.
+
 ## Commands
 
 | Task          | Command             |
