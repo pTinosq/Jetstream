@@ -47,16 +47,27 @@ Common tasks:
 `npm run check` runs type-check, lint, format-check, and tests — it must pass
 before every commit.
 
+### Task shortcuts (just)
+
+A [`justfile`](https://github.com/casey/just) wraps the common tasks. Run `just`
+to list them:
+
+```sh
+just setup   # first-run setup
+just dev     # dev server + Drizzle Studio via Overmind
+just web     # only the SvelteKit dev server
+just check   # all checks
+```
+
 ### Overmind (optional)
 
-The app is a single process, so `npm run dev` is all you need. If you'd like to
-run the dev server alongside [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overview)
-(a DB browser) in one terminal, a `Procfile.dev` is provided for
-[Overmind](https://github.com/DarthSim/overmind):
+`just dev` uses [Overmind](https://github.com/DarthSim/overmind) to run the dev
+server alongside [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overview)
+(a DB browser) via `Procfile.dev`. The app is a single process, so plain
+`npm run dev` (or `just web`) is equally fine.
 
 ```sh
 brew install overmind          # requires tmux
-overmind start -f Procfile.dev # web: dev server · studio: Drizzle Studio
 ```
 
 ## Configuration
