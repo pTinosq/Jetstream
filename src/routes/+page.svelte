@@ -25,8 +25,8 @@
 
 <div class="mx-auto max-w-5xl px-6 py-10 text-slate-100">
   <header class="mb-8">
-    <h1 class="text-2xl font-semibold">Jetstream</h1>
-    <p class="text-slate-400">Your personal flight log.</p>
+    <h1 class="text-2xl font-semibold">Flights</h1>
+    <p class="text-slate-400">Log the flights you've taken and plan to take.</p>
   </header>
 
   <section class="mb-10 rounded-xl border border-slate-800 bg-slate-900/50 p-6">
