@@ -1,0 +1,2 @@
+web: npm run dev
+studio: npm run db:studio
