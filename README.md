@@ -47,6 +47,18 @@ Common tasks:
 `npm run check` runs type-check, lint, format-check, and tests — it must pass
 before every commit.
 
+### Overmind (optional)
+
+The app is a single process, so `npm run dev` is all you need. If you'd like to
+run the dev server alongside [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overview)
+(a DB browser) in one terminal, a `Procfile.dev` is provided for
+[Overmind](https://github.com/DarthSim/overmind):
+
+```sh
+brew install overmind          # requires tmux
+overmind start -f Procfile.dev # web: dev server · studio: Drizzle Studio
+```
+
 ## Configuration
 
 `npm run setup` copies `.env.example` to `.env` on first run. `DATABASE_URL`
