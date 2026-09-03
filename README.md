@@ -26,33 +26,38 @@ Requires Node 22+.
 
 ```sh
 npm install
-npm run dev
+npm run setup        # creates .env, migrates the DB, loads airports (first run)
+npm run dev          # → http://localhost:5173
 ```
+
+SvelteKit serves the UI, server routes, and API from a single process — there
+is no separate backend to start.
 
 Common tasks:
 
-| Task       | Command           |
-| ---------- | ----------------- |
-| Dev server | `npm run dev`     |
-| Build      | `npm run build`   |
-| Preview    | `npm run preview` |
-| All checks | `npm run check`   |
-| Sync DB    | `npm run db:push` |
+| Task        | Command           |
+| ----------- | ----------------- |
+| First-run   | `npm run setup`   |
+| Dev server  | `npm run dev`     |
+| Build       | `npm run build`   |
+| Preview     | `npm run preview` |
+| All checks  | `npm run check`   |
+| Reseed data | `npm run db:seed` |
 
 `npm run check` runs type-check, lint, format-check, and tests — it must pass
 before every commit.
 
 ## Configuration
 
-Copy `.env.example` to `.env`. `DATABASE_URL` points at the SQLite file
-(defaults to `local.db`).
+`npm run setup` copies `.env.example` to `.env` on first run. `DATABASE_URL`
+points at the SQLite file (defaults to `local.db`).
 
-First-time setup — create the schema and load airport reference data:
+`db:seed` downloads the OurAirports dataset; to seed offline, pass a local CSV:
+`npm run db:seed ./airports.csv`.
 
-```sh
-npm run db:migrate   # create tables
-npm run db:seed      # load airports (OurAirports; offline: db:seed ./airports.csv)
-```
+When self-hosting behind a domain, set `ORIGIN` to the public URL (e.g.
+`ORIGIN=https://flights.example.com`) so form submissions pass SvelteKit's CSRF
+check.
 
 ## License
 
