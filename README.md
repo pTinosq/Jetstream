@@ -82,6 +82,18 @@ When self-hosting behind a domain, set `ORIGIN` to the public URL (e.g.
 `ORIGIN=https://flights.example.com`) so form submissions pass SvelteKit's CSRF
 check.
 
+### Flight auto-detect (optional)
+
+The add-flight form can look up real flights for a route + date so you pick one
+instead of typing the details. This uses the free
+[OpenSky Network](https://opensky-network.org/) API, which requires a (free)
+account: create an API client and set `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET`.
+Without them, entry is fully manual. OpenSky covers flights that have already
+departed (past flights).
+
+The data source is pluggable (`FlightSearchProvider`), so other providers can
+be added later.
+
 ## License
 
 TBD.

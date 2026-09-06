@@ -9,7 +9,8 @@ person a centralised view of flights they've taken and will take:
 
 - An interactive **globe/map** of airports flown to, with arcs between routes.
 - Multiple views: **map**, **dashboard** (stats), and **table**.
-- Later: assisted **flight detection** (enter date + airport → look up flight).
+- Assisted **flight detection**: enter from/to + date → pick a real flight to
+  prefill the form.
 
 Design priorities: **self-hostable and simple** above all. Single-user, **no
 auth** for now (it's behind the host's own access). Ships as one deployable;
@@ -24,6 +25,10 @@ auth** for now (it's behind the host's own access). Ships as one deployable;
 - **Styling:** Tailwind CSS.
 - **Airport data:** OurAirports open dataset (public domain) seeded into SQLite;
   airport code → coordinates resolved locally, fully offline.
+- **Flight lookup:** pluggable `FlightSearchProvider` (`src/lib/server/flights/
+providers/`). OpenSky provider (free, past flights) is enabled when
+  `OPENSKY_CLIENT_ID`/`SECRET` are set; otherwise entry is manual. Keep response
+  parsing pure/testable (see `opensky-map.ts`); isolate HTTP/OAuth in the provider.
 
 ## Data model
 
