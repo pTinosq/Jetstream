@@ -6,7 +6,14 @@
     label,
     placeholder = 'Search by code or city…',
     error,
-  }: { name: string; label: string; placeholder?: string; error?: string | undefined } = $props();
+    onSelect,
+  }: {
+    name: string;
+    label: string;
+    placeholder?: string;
+    error?: string | undefined;
+    onSelect?: (airport: Airport | null) => void;
+  } = $props();
 
   let query = $state('');
   let results = $state<Airport[]>([]);
@@ -31,7 +38,10 @@
 
   function onInput(): void {
     // Any edit invalidates a previous selection until the user picks again.
-    selectedId = '';
+    if (selectedId !== '') {
+      selectedId = '';
+      onSelect?.(null);
+    }
     open = true;
     clearTimeout(debounce);
     const q = query.trim();
@@ -47,6 +57,7 @@
     query = displayName(airport);
     results = [];
     open = false;
+    onSelect?.(airport);
   }
 </script>
 
