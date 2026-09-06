@@ -60,6 +60,18 @@ export function toIsoWithOffset(local: string, timeZone: string): string {
 }
 
 /**
+ * Render a UTC instant (a `Date`) as ISO 8601 with the given zone's offset,
+ * e.g. an epoch that is 09:00 in London → "2026-03-01T09:00:00+00:00". Used to
+ * turn absolute times from flight-data APIs into airport-local timestamps.
+ */
+export function instantToIsoWithOffset(instant: Date, timeZone: string): string {
+  const offset = offsetMinutes(timeZone, instant);
+  // Shift the instant by the offset so its UTC fields read as local wall-clock.
+  const localFields = new Date(instant.getTime() + offset * 60_000);
+  return `${localFields.toISOString().slice(0, 19)}${formatOffset(offset)}`;
+}
+
+/**
  * Render a stored ISO-with-offset string as "YYYY-MM-DD HH:mm", preserving the
  * airport-local wall-clock time rather than converting to the viewer's zone.
  */
