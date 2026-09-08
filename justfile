@@ -8,9 +8,15 @@ default:
 setup:
     npm run setup
 
+# Ensure .env exists and the schema is applied (offline, idempotent)
+_prepare:
+    node scripts/setup.ts
+    npm run db:migrate
+
 # Run the dev server + Drizzle Studio together via Overmind
-dev:
-    overmind start -f Procfile.dev
+# OVERMIND_CAN_DIE lets Studio exit without taking down the dev server.
+dev: _prepare
+    OVERMIND_CAN_DIE=studio overmind start -f Procfile.dev
 
 # Run only the SvelteKit dev server
 web:

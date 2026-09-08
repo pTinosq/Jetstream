@@ -54,10 +54,13 @@ to list them:
 
 ```sh
 just setup   # first-run setup
-just dev     # dev server + Drizzle Studio via Overmind
+just dev     # ensures .env + schema, then dev server + Drizzle Studio via Overmind
 just web     # only the SvelteKit dev server
 just check   # all checks
 ```
+
+`just dev` prepares `.env` and the DB schema automatically and runs Studio with
+`OVERMIND_CAN_DIE`, so Studio exiting won't take down the dev server.
 
 ### Overmind (optional)
 
