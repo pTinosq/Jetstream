@@ -54,6 +54,7 @@
     "vitest": "^4.1.8"
   },
   "dependencies": {
+    "@auth/sveltekit": "^1.11.3",
     "@photostructure/tz-lookup": "^11.6.1",
     "better-sqlite3": "^13.0.2",
     "csv-parse": "^7.0.2",

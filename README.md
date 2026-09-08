@@ -70,6 +70,17 @@ server alongside [Drizzle Studio](https://orm.drizzle.team/drizzle-studio/overvi
 brew install overmind          # requires tmux
 ```
 
+## Access & sign-in
+
+Jetstream is single-owner. On first launch it sends you to **/setup** to
+register a GitHub OAuth app (it shows the exact callback URL to use) and paste
+its Client ID + secret — stored in the DB, no `.env` needed. The **first GitHub
+account to sign in claims the instance**; everyone else is refused, so a
+publicly-hosted deploy stays private to you.
+
+> Create the OAuth app at github.com/settings/developers with callback
+> `<your-url>/auth/callback/github`.
+
 ## Configuration
 
 `npm run setup` copies `.env.example` to `.env` on first run. `DATABASE_URL`
