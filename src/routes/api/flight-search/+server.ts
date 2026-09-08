@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import { z } from 'zod';
-import { db } from '$lib/server/db';
+import { getDb } from '$lib/server/db';
 import { getAirportById } from '$lib/server/airports/get';
 import { resolveFlightProvider } from '$lib/server/flights/providers/resolve';
 import type { RequestHandler } from './$types';
@@ -24,6 +24,7 @@ export const GET: RequestHandler = async ({ url }) => {
   });
   if (!parsed.success) error(400, 'Invalid search parameters');
 
+  const db = getDb();
   const provider = resolveFlightProvider(db);
   if (provider === null) return json({ provider: null, candidates: [] });
 

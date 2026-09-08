@@ -25,10 +25,15 @@ auth** for now (it's behind the host's own access). Ships as one deployable;
 - **Styling:** Tailwind CSS.
 - **Airport data:** OurAirports open dataset (public domain) seeded into SQLite;
   airport code → coordinates resolved locally, fully offline.
-- **Flight lookup:** pluggable `FlightSearchProvider` (`src/lib/server/flights/
-providers/`). OpenSky provider (free, past flights) is enabled when
-  `OPENSKY_CLIENT_ID`/`SECRET` are set; otherwise entry is manual. Keep response
-  parsing pure/testable (see `opensky-map.ts`); isolate HTTP/OAuth in the provider.
+- **Flight lookup:** pluggable `FlightSearchProvider` in
+  `src/lib/server/flights/providers/`. OpenSky provider (free, past flights).
+  Keep response parsing pure/testable (`opensky-map.ts`); isolate HTTP/OAuth in
+  the provider.
+- **Config:** instance settings (e.g. OpenSky keys) live in the `settings` table,
+  set via the in-app **Settings** page (`src/lib/server/settings/`). Credentials
+  resolve DB-first, then `OPENSKY_CLIENT_ID`/`SECRET` env as fallback.
+- **DB access:** import `getDb()` (lazy) from `$lib/server/db`, never a
+  module-level connection — so `vite build` works without a database.
 
 ## Data model
 

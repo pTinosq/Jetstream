@@ -1,7 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
-import { db } from '$lib/server/db';
+import { getDb } from '$lib/server/db';
 import {
   clearOpenSkyCredentials,
   getOpenSkyClientId,
@@ -15,7 +15,7 @@ function envConfigured(): boolean {
 }
 
 export const load: PageServerLoad = () => {
-  const clientId = getOpenSkyClientId(db);
+  const clientId = getOpenSkyClientId(getDb());
   const source = clientId !== null ? 'db' : envConfigured() ? 'env' : null;
   return { opensky: { clientId, source } };
 };
@@ -35,14 +35,14 @@ export const actions: Actions = {
     if (!parsed.success) {
       return fail(400, { errors: z.flattenError(parsed.error).fieldErrors });
     }
-    saveOpenSkyCredentials(db, parsed.data);
+    saveOpenSkyCredentials(getDb(), parsed.data);
     // Save regardless, but tell the user whether the keys actually work.
     const verify = await verifyOpenSkyCredentials(parsed.data);
     return { saved: true, verified: verify.ok, verifyError: verify.ok ? null : verify.error };
   },
 
   clear: () => {
-    clearOpenSkyCredentials(db);
+    clearOpenSkyCredentials(getDb());
     return { cleared: true };
   },
 };

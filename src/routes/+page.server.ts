@@ -1,12 +1,12 @@
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
-import { db } from '$lib/server/db';
+import { getDb } from '$lib/server/db';
 import { createFlight, listFlights } from '$lib/server/flights/repository';
 import { flightInputSchema } from '$lib/flights/schema';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  return { flights: await listFlights(db) };
+  return { flights: await listFlights(getDb()) };
 };
 
 export const actions: Actions = {
@@ -22,7 +22,7 @@ export const actions: Actions = {
       return fail(400, { errors: z.flattenError(parsed.error).fieldErrors, values });
     }
 
-    createFlight(db, parsed.data);
+    createFlight(getDb(), parsed.data);
     return { created: true };
   },
 };
