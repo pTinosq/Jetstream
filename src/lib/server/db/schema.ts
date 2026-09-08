@@ -21,6 +21,19 @@ export const airports = sqliteTable('airports', {
 });
 
 /**
+ * Instance configuration set from the app's Settings page (e.g. OpenSky API
+ * credentials), so a self-hoster can configure without editing `.env`.
+ * Key/value; values are stored as text.
+ */
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
+/**
  * A journey that groups one or more flight legs (e.g. LHR→DXB→SYD). Optional:
  * a leg may stand alone with no trip.
  */

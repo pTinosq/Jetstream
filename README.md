@@ -87,12 +87,16 @@ check.
 The add-flight form can look up real flights for a route + date so you pick one
 instead of typing the details. This uses the free
 [OpenSky Network](https://opensky-network.org/) API, which requires a (free)
-account: create an API client and set `OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET`.
-Without them, entry is fully manual. OpenSky covers flights that have already
-departed (past flights).
+account.
 
-The data source is pluggable (`FlightSearchProvider`), so other providers can
-be added later.
+**Configure it in the app:** open **Settings**, paste your OpenSky API client ID
+and secret, and Save — the app tests the connection and stores the keys in the
+database. No `.env` editing required. (Advanced/Docker deploys may instead set
+`OPENSKY_CLIENT_ID` / `OPENSKY_CLIENT_SECRET`; DB settings take precedence.)
+
+Without credentials, entry is fully manual. OpenSky covers flights that have
+already departed. The data source is pluggable (`FlightSearchProvider`), so
+other providers can be added later.
 
 ## License
 

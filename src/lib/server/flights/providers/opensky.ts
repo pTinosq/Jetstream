@@ -15,6 +15,38 @@ export interface OpenSkyCredentials {
   clientSecret: string;
 }
 
+/** Exchange client credentials for an access token; throws on failure. */
+async function requestOpenSkyToken(
+  credentials: OpenSkyCredentials,
+): Promise<{ value: string; expiresIn: number }> {
+  const response = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: credentials.clientId,
+      client_secret: credentials.clientSecret,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`OpenSky auth failed: ${response.status} ${response.statusText}`);
+  }
+  const token = tokenSchema.parse(await response.json());
+  return { value: token.access_token, expiresIn: token.expires_in };
+}
+
+/** Check credentials by attempting a token exchange, for the Settings page. */
+export async function verifyOpenSkyCredentials(
+  credentials: OpenSkyCredentials,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await requestOpenSkyToken(credentials);
+    return { ok: true };
+  } catch (cause) {
+    return { ok: false, error: cause instanceof Error ? cause.message : 'Verification failed' };
+  }
+}
+
 /**
  * Free flight data from the OpenSky Network. Historical route lookups require a
  * (free) account, so credentials are mandatory. Covers flights that have
@@ -47,21 +79,9 @@ export class OpenSkyProvider implements FlightSearchProvider {
     const now = Date.now();
     if (this.#token !== null && this.#token.expiresAt > now) return this.#token.value;
 
-    const response = await fetch(TOKEN_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'client_credentials',
-        client_id: this.#credentials.clientId,
-        client_secret: this.#credentials.clientSecret,
-      }),
-    });
-    if (!response.ok) {
-      throw new Error(`OpenSky auth failed: ${response.status} ${response.statusText}`);
-    }
-    const token = tokenSchema.parse(await response.json());
+    const token = await requestOpenSkyToken(this.#credentials);
     // Refresh a minute early to avoid failing at the edge of expiry.
-    this.#token = { value: token.access_token, expiresAt: now + (token.expires_in - 60) * 1000 };
+    this.#token = { value: token.value, expiresAt: now + (token.expiresIn - 60) * 1000 };
     return this.#token.value;
   }
 }
