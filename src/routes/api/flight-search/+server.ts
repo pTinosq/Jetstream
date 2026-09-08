@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ url }) => {
   });
   if (!parsed.success) error(400, 'Invalid search parameters');
 
-  const provider = resolveFlightProvider();
+  const provider = resolveFlightProvider(db);
   if (provider === null) return json({ provider: null, candidates: [] });
 
   const from = getAirportById(db, parsed.data.from);
