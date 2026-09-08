@@ -9,8 +9,9 @@
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
-  const links: { href: '/' | '/globe' | '/settings'; label: string }[] = [
+  const links: { href: '/' | '/dashboard' | '/globe' | '/settings'; label: string }[] = [
     { href: '/', label: 'Flights' },
+    { href: '/dashboard', label: 'Dashboard' },
     { href: '/globe', label: 'Globe' },
     { href: '/settings', label: 'Settings' },
   ];
