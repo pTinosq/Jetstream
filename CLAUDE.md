@@ -12,9 +12,10 @@ person a centralised view of flights they've taken and will take:
 - Assisted **flight detection**: enter from/to + date → pick a real flight to
   prefill the form.
 
-Design priorities: **self-hostable and simple** above all. Single-user, **no
-auth** for now (it's behind the host's own access). Ships as one deployable;
-**Railway** is the initial target (keep it portable to Docker/other hosts).
+Design priorities: **self-hostable and simple** above all. Single-owner:
+**GitHub sign-in** gates the instance (first account to sign in claims it); the
+data isn't split per user. Ships as one deployable; **Railway** is the initial
+target (keep it portable to Docker/other hosts).
 
 ## Architecture
 
@@ -34,6 +35,10 @@ auth** for now (it's behind the host's own access). Ships as one deployable;
   resolve DB-first, then `OPENSKY_CLIENT_ID`/`SECRET` env as fallback.
 - **DB access:** import `getDb()` (lazy) from `$lib/server/db`, never a
   module-level connection — so `vite build` works without a database.
+- **Auth:** Auth.js (`@auth/sveltekit`) configured dynamically from DB settings
+  (`src/lib/server/auth.ts`); GitHub OAuth set up via `/setup`. `hooks.server.ts`
+  gates routes; single-owner enforced in the `signIn` callback. Session secret
+  is auto-generated and stored.
 
 ## Data model
 
