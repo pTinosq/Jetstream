@@ -7,9 +7,10 @@
 
   let { children }: { children: Snippet } = $props();
 
-  const links: { href: '/' | '/globe'; label: string }[] = [
+  const links: { href: '/' | '/globe' | '/settings'; label: string }[] = [
     { href: '/', label: 'Flights' },
     { href: '/globe', label: 'Globe' },
+    { href: '/settings', label: 'Settings' },
   ];
 </script>
 

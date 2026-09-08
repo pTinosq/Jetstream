@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import { resolve } from '$app/paths';
   import AirportSelect from '$lib/components/AirportSelect.svelte';
   import { formatWallClock } from '$lib/datetime';
   import { CABIN_CLASSES } from '$lib/flights/schema';
@@ -150,8 +151,9 @@
         {#if searched && !searching}
           {#if !providerConfigured}
             <p class="mt-3 text-sm text-amber-300">
-              Auto-detect isn't configured. Set <code>OPENSKY_CLIENT_ID</code> and
-              <code>OPENSKY_CLIENT_SECRET</code> to look up flights, or fill in the details below.
+              Auto-detect isn't configured. Add your OpenSky keys in
+              <a class="underline" href={resolve('/settings')}>Settings</a>, or fill in the details
+              below manually.
             </p>
           {:else if searchError !== null}
             <p class="mt-3 text-sm text-rose-400">{searchError}</p>
