@@ -41,6 +41,11 @@ test('parseCallsign splits airline and number', () => {
   expect(parseCallsign('BAW117 ')).toEqual({ airline: 'BAW', flightNumber: '117' });
 });
 
+test('parseCallsign handles number suffixes (letters after digits)', () => {
+  expect(parseCallsign('UAE79Y')).toEqual({ airline: 'UAE', flightNumber: '79Y' });
+  expect(parseCallsign('UAE7CN')).toEqual({ airline: 'UAE', flightNumber: '7CN' });
+});
+
 test('parseCallsign returns nulls for unparseable callsigns', () => {
   expect(parseCallsign(null)).toEqual({ airline: null, flightNumber: null });
   expect(parseCallsign('123')).toEqual({ airline: null, flightNumber: null });
