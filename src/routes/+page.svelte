@@ -5,6 +5,7 @@
   import { formatWallClock } from '$lib/datetime';
   import { CABIN_CLASSES } from '$lib/flights/schema';
   import type { Airport } from '$lib/airports/types';
+  import type { Aircraft } from '$lib/aircraft/types';
   import type { FlightCandidate } from '$lib/flights/candidate';
   import type { PageData, ActionData } from './$types';
 
@@ -26,6 +27,10 @@
   let flightNumber = $state('');
   let departure = $state('');
   let arrival = $state('');
+  let aircraftType = $state('');
+  let aircraftRegistration = $state('');
+  let aircraftPhoto = $state<string | null>(null);
+  let aircraftLookup = $state<'idle' | 'loading' | 'done'>('idle');
 
   // Auto-detect search state.
   let origin = $state<Airport | null>(null);
@@ -89,6 +94,30 @@
     flightNumber = candidate.flightNumber ?? '';
     departure = toLocalInput(candidate.departure);
     arrival = candidate.arrival !== null ? toLocalInput(candidate.arrival) : '';
+    aircraftType = '';
+    aircraftRegistration = '';
+    aircraftPhoto = null;
+    aircraftLookup = 'idle';
+    if (candidate.icao24 !== null) void enrichAircraft(candidate.icao24);
+  }
+
+  // Resolve the specific airframe (registration, type, photo) from its icao24.
+  async function enrichAircraft(icao24: string): Promise<void> {
+    aircraftLookup = 'loading';
+    try {
+      const response = await fetch(`/api/aircraft?icao24=${encodeURIComponent(icao24)}`);
+      const payload = (await response.json()) as { aircraft: Aircraft | null };
+      const aircraft = payload.aircraft;
+      if (aircraft !== null) {
+        aircraftType = aircraft.type ?? aircraft.typeCode ?? '';
+        aircraftRegistration = aircraft.registration ?? '';
+        aircraftPhoto = aircraft.photoUrl;
+      }
+    } catch {
+      // Enrichment is best-effort; leave the fields for manual entry.
+    } finally {
+      aircraftLookup = 'done';
+    }
   }
 
   const fieldClass =
@@ -246,11 +275,17 @@
         </div>
 
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="aircraftType">Aircraft type</label>
+          <label class="text-sm font-medium text-slate-200" for="aircraftType">
+            Aircraft type
+            {#if aircraftLookup === 'loading'}<span class="text-xs text-slate-500"
+                >· looking up…</span
+              >{/if}
+          </label>
           <input
             id="aircraftType"
             name="aircraftType"
             type="text"
+            bind:value={aircraftType}
             placeholder="e.g. A380"
             class={fieldClass}
           />
@@ -264,10 +299,21 @@
             id="aircraftRegistration"
             name="aircraftRegistration"
             type="text"
+            bind:value={aircraftRegistration}
             placeholder="e.g. G-XLEB"
             class={fieldClass}
           />
         </div>
+
+        {#if aircraftPhoto !== null}
+          <div class="sm:col-span-2">
+            <img
+              src={aircraftPhoto}
+              alt="{aircraftRegistration} aircraft"
+              class="h-40 w-full rounded-lg border border-slate-800 object-cover"
+            />
+          </div>
+        {/if}
 
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-slate-200" for="seat">Seat</label>
