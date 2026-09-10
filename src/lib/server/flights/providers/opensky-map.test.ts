@@ -70,6 +70,7 @@ test('converts absolute times to each airport local zone', () => {
   expect(candidate?.arrival).toBe('2026-03-01T11:30:00-05:00');
   expect(candidate?.airline).toBe('BAW');
   expect(candidate?.flightNumber).toBe('117');
+  expect(candidate?.icao24).toBe('abc123');
 });
 
 test('sorts candidates by departure time', () => {
