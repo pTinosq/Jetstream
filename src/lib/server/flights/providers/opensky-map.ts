@@ -47,6 +47,7 @@ export function mapOpenSkyDepartures(raw: unknown, from: Airport, to: Airport): 
         airline,
         flightNumber,
         callsign: row.callsign?.trim() ?? null,
+        icao24: row.icao24.trim().toLowerCase(),
         departure: instantToIsoWithOffset(new Date(row.firstSeen * 1000), fromZone),
         arrival: instantToIsoWithOffset(new Date(row.lastSeen * 1000), toZone),
         originIata: from.iata,

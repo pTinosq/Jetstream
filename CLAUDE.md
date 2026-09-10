@@ -30,6 +30,9 @@ target (keep it portable to Docker/other hosts).
   `src/lib/server/flights/providers/`. OpenSky provider (free, past flights).
   Keep response parsing pure/testable (`opensky-map.ts`); isolate HTTP/OAuth in
   the provider.
+- **Aircraft lookup:** each candidate carries the OpenSky `icao24`; adsbdb
+  (`src/lib/server/aircraft/`, free, no key) resolves it to registration/type/
+  photo, exposed at `/api/aircraft` and auto-filled when a flight is picked.
 - **Config:** instance settings (e.g. OpenSky keys) live in the `settings` table,
   set via the in-app **Settings** page (`src/lib/server/settings/`). Credentials
   resolve DB-first, then `OPENSKY_CLIENT_ID`/`SECRET` env as fallback.
