@@ -127,27 +127,26 @@
       aircraftLookup = 'done';
     }
   }
-
-  const fieldClass =
-    'rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-sky-500';
 </script>
 
-<div class="mx-auto max-w-5xl px-6 py-10 text-slate-100">
+<div class="enter mx-auto max-w-5xl px-4 py-10 sm:px-6">
   <header class="mb-8">
-    <h1 class="text-2xl font-semibold">Flights</h1>
-    <p class="text-slate-400">Log the flights you've taken and plan to take.</p>
+    <h1 class="text-3xl font-semibold">Flights</h1>
+    <p class="mt-1 text-ink-soft">Log the flights you've taken and plan to take.</p>
   </header>
 
-  <section class="mb-10 rounded-xl border border-slate-800 bg-slate-900/50 p-6">
-    <h2 class="mb-4 text-lg font-medium">Add a flight</h2>
+  <section class="glass mb-10 rounded-panel p-6 sm:p-7">
+    <h2 class="mb-5 text-lg font-medium">Add a flight</h2>
 
     {#if created}
-      <p class="mb-4 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+      <p
+        class="mb-5 rounded-control border border-emerald-600/15 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700"
+      >
         Flight added.
       </p>
     {/if}
 
-    <form method="POST" action="?/create" use:enhance class="flex flex-col gap-5">
+    <form method="POST" action="?/create" use:enhance class="flex flex-col gap-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AirportSelect
           name="originId"
@@ -168,21 +167,21 @@
       </div>
 
       <!-- Auto-detect: find real flights for the route + date and prefill. -->
-      <div class="rounded-lg border border-slate-800 bg-slate-950/40 p-4">
+      <div class="rounded-panel border border-line bg-white/45 p-4">
         <div class="flex flex-wrap items-end gap-3">
-          <div class="flex flex-col gap-1">
-            <label class="text-sm font-medium text-slate-200" for="searchDate">Flight date</label>
-            <input id="searchDate" type="date" bind:value={searchDate} class={fieldClass} />
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-ink-soft" for="searchDate">Flight date</label>
+            <input id="searchDate" type="date" bind:value={searchDate} class="field font-mono" />
           </div>
           <button
             type="button"
             onclick={findFlights}
             disabled={!canSearch || searching}
-            class="rounded-md bg-slate-700 px-4 py-2 font-medium text-white hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"
+            class="btn btn-ghost disabled:cursor-not-allowed disabled:opacity-50"
           >
             {searching ? 'Searching…' : 'Find flights'}
           </button>
-          <p class="text-xs text-slate-500">
+          <p class="max-w-xs text-xs leading-relaxed text-ink-mute">
             Pick From, To and a date to look up flights. Works best for recent flights (roughly the
             last few weeks).
           </p>
@@ -190,19 +189,24 @@
 
         {#if searched && !searching}
           {#if !providerConfigured}
-            <p class="mt-3 text-sm text-amber-300">
+            <p class="mt-3 text-sm text-amber-700">
               Auto-detect isn't configured. Add your OpenSky keys in
-              <a class="underline" href={resolve('/settings')}>Settings</a>, or fill in the details
-              below manually.
+              <a class="font-medium text-accent hover:underline" href={resolve('/settings')}
+                >Settings</a
+              >, or fill in the details below manually.
             </p>
           {:else if searchError !== null}
-            <p class="mt-3 text-sm text-rose-400">{searchError}</p>
+            <p class="mt-3 text-sm text-rose-600">{searchError}</p>
           {:else if candidates.length === 0}
-            <p class="mt-3 text-sm text-slate-400">No flights found for that route and date.</p>
+            <p class="mt-3 text-sm text-ink-mute">No flights found for that route and date.</p>
           {:else}
-            <div class="mt-3 flex items-center gap-2">
-              <label class="text-sm text-slate-300" for="airlineFilter">Airline</label>
-              <select id="airlineFilter" bind:value={airlineFilter} class={fieldClass}>
+            <div class="mt-4 flex items-center gap-2">
+              <label class="text-sm text-ink-soft" for="airlineFilter">Airline</label>
+              <select
+                id="airlineFilter"
+                bind:value={airlineFilter}
+                class="field w-auto py-1.5 font-mono text-sm"
+              >
                 <option value="">All</option>
                 {#each airlineOptions as code (code)}
                   <option value={code}>{code}</option>
@@ -210,19 +214,19 @@
               </select>
             </div>
             <ul
-              class="mt-3 max-h-60 divide-y divide-slate-800 overflow-auto rounded-md border border-slate-800"
+              class="mt-3 max-h-64 divide-y divide-line overflow-auto rounded-control border border-line bg-white/55"
             >
               {#each visibleCandidates as candidate (candidate.callsign ?? candidate.departure)}
                 <li>
                   <button
                     type="button"
                     onclick={() => choose(candidate)}
-                    class="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-800"
+                    class="flex w-full items-center justify-between px-3.5 py-2.5 text-left transition-colors hover:bg-accent-wash"
                   >
-                    <span class="font-medium">{candidateLabel(candidate)}</span>
-                    <span class="text-slate-400">
-                      {candidateTime(candidate.departure)}
-                      {#if candidate.arrival !== null}→ {candidateTime(candidate.arrival)}{/if}
+                    <span class="font-mono text-sm font-medium">{candidateLabel(candidate)}</span>
+                    <span class="font-mono text-xs text-ink-mute">
+                      {candidateTime(candidate.departure)}{#if candidate.arrival !== null}&nbsp;→
+                        {candidateTime(candidate.arrival)}{/if}
                     </span>
                   </button>
                 </li>
@@ -233,59 +237,59 @@
       </div>
 
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="departure">Departure</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="departure">Departure</label>
           <input
             id="departure"
             name="departure"
             type="datetime-local"
             bind:value={departure}
-            class={fieldClass}
+            class="field font-mono"
           />
           {#if errors?.departure?.[0] !== undefined}
-            <p class="text-sm text-rose-400">{errors.departure[0]}</p>
+            <p class="text-sm text-rose-600">{errors.departure[0]}</p>
           {/if}
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="arrival">Arrival (optional)</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="arrival">Arrival (optional)</label>
           <input
             id="arrival"
             name="arrival"
             type="datetime-local"
             bind:value={arrival}
-            class={fieldClass}
+            class="field font-mono"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="airline">Airline</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="airline">Airline</label>
           <input
             id="airline"
             name="airline"
             type="text"
             bind:value={airline}
             placeholder="e.g. BA"
-            class={fieldClass}
+            class="field"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="flightNumber">Flight number</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="flightNumber">Flight number</label>
           <input
             id="flightNumber"
             name="flightNumber"
             type="text"
             bind:value={flightNumber}
             placeholder="e.g. 117"
-            class={fieldClass}
+            class="field font-mono"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="aircraftType">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="aircraftType">
             Aircraft type
-            {#if aircraftLookup === 'loading'}<span class="text-xs text-slate-500"
+            {#if aircraftLookup === 'loading'}<span class="text-xs text-ink-mute"
                 >· looking up…</span
               >{/if}
           </label>
@@ -295,12 +299,12 @@
             type="text"
             bind:value={aircraftType}
             placeholder="e.g. A380"
-            class={fieldClass}
+            class="field"
           />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="aircraftRegistration"
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="aircraftRegistration"
             >Registration</label
           >
           <input
@@ -309,7 +313,7 @@
             type="text"
             bind:value={aircraftRegistration}
             placeholder="e.g. G-XLEB"
-            class={fieldClass}
+            class="field font-mono"
           />
         </div>
 
@@ -318,78 +322,81 @@
             <img
               src={aircraftPhoto}
               alt="{aircraftRegistration} aircraft"
-              class="h-40 w-full rounded-lg border border-slate-800 object-cover"
+              class="h-44 w-full rounded-control border border-line object-cover"
             />
           </div>
         {/if}
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="seat">Seat</label>
-          <input id="seat" name="seat" type="text" placeholder="e.g. 12A" class={fieldClass} />
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="seat">Seat</label>
+          <input id="seat" name="seat" type="text" placeholder="e.g. 12A" class="field font-mono" />
         </div>
 
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-slate-200" for="cabinClass">Cabin</label>
-          <select id="cabinClass" name="cabinClass" class={fieldClass}>
-            <option value="">—</option>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-sm font-medium text-ink-soft" for="cabinClass">Cabin</label>
+          <select id="cabinClass" name="cabinClass" class="field">
+            <option value="">Not set</option>
             {#each CABIN_CLASSES as cabin (cabin)}
               <option value={cabin}>{cabinLabels[cabin]}</option>
             {/each}
           </select>
         </div>
 
-        <div class="flex flex-col gap-1 sm:col-span-2">
-          <label class="text-sm font-medium text-slate-200" for="notes">Notes</label>
-          <textarea id="notes" name="notes" rows="2" class={fieldClass}></textarea>
+        <div class="flex flex-col gap-1.5 sm:col-span-2">
+          <label class="text-sm font-medium text-ink-soft" for="notes">Notes</label>
+          <textarea id="notes" name="notes" rows="2" class="field"></textarea>
         </div>
       </div>
 
       <div>
-        <button
-          type="submit"
-          class="rounded-md bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500"
-        >
-          Add flight
-        </button>
+        <button type="submit" class="btn btn-primary">Add flight</button>
       </div>
     </form>
   </section>
 
   <section>
-    <h2 class="mb-4 text-lg font-medium">Flights ({data.flights.length})</h2>
+    <h2 class="mb-4 text-lg font-medium">
+      Flights <span class="font-mono text-base text-ink-mute">({data.flights.length})</span>
+    </h2>
 
     {#if data.flights.length === 0}
-      <p class="text-slate-400">No flights logged yet. Add your first one above.</p>
+      <div class="glass rounded-panel p-8 text-center text-sm text-ink-soft">
+        No flights logged yet. Add your first one above.
+      </div>
     {:else}
-      <div class="overflow-x-auto rounded-xl border border-slate-800">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-900/70 text-slate-300">
-            <tr>
-              <th class="px-4 py-3 font-medium">Departure</th>
-              <th class="px-4 py-3 font-medium">Route</th>
-              <th class="px-4 py-3 font-medium">Flight</th>
-              <th class="px-4 py-3 font-medium">Aircraft</th>
-              <th class="px-4 py-3 font-medium">Seat</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each data.flights as flight (flight.id)}
-              <tr class="border-t border-slate-800">
-                <td class="px-4 py-3 text-slate-300">{formatWallClock(flight.departure)}</td>
-                <td class="px-4 py-3 font-medium">
-                  {routeCode(flight.origin.iata, flight.origin.icao)}
-                  <span class="text-slate-500">→</span>
-                  {routeCode(flight.destination.iata, flight.destination.icao)}
-                </td>
-                <td class="px-4 py-3 text-slate-300">
-                  {[flight.airline, flight.flightNumber].filter(Boolean).join(' ') || '—'}
-                </td>
-                <td class="px-4 py-3 text-slate-300">{flight.aircraftType ?? '—'}</td>
-                <td class="px-4 py-3 text-slate-300">{flight.seat ?? '—'}</td>
+      <div class="glass overflow-hidden rounded-panel">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead>
+              <tr class="border-b border-line text-xs tracking-wide text-ink-mute uppercase">
+                <th class="px-5 py-3 font-medium">Departure</th>
+                <th class="px-5 py-3 font-medium">Route</th>
+                <th class="px-5 py-3 font-medium">Flight</th>
+                <th class="px-5 py-3 font-medium">Aircraft</th>
+                <th class="px-5 py-3 font-medium">Seat</th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#each data.flights as flight (flight.id)}
+                <tr class="border-t border-line/70 transition-colors hover:bg-white/55">
+                  <td class="px-5 py-3 font-mono whitespace-nowrap text-ink-soft">
+                    {formatWallClock(flight.departure)}
+                  </td>
+                  <td class="px-5 py-3 font-mono font-medium whitespace-nowrap">
+                    {routeCode(flight.origin.iata, flight.origin.icao)}
+                    <span class="text-ink-mute">→</span>
+                    {routeCode(flight.destination.iata, flight.destination.icao)}
+                  </td>
+                  <td class="px-5 py-3 font-mono text-ink-soft">
+                    {[flight.airline, flight.flightNumber].filter(Boolean).join(' ') || '—'}
+                  </td>
+                  <td class="px-5 py-3 text-ink-soft">{flight.aircraftType ?? '—'}</td>
+                  <td class="px-5 py-3 font-mono text-ink-soft">{flight.seat ?? '—'}</td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       </div>
     {/if}
   </section>

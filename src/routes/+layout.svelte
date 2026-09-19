@@ -1,6 +1,5 @@
 <script lang="ts">
   import './layout.css';
-  import favicon from '$lib/assets/favicon.svg';
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import { signOut } from '@auth/sveltekit/client';
@@ -17,37 +16,74 @@
   ];
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<div class="min-h-dvh">
+  {#if data.session !== null}
+    <nav class="glass-bar sticky top-0 z-50">
+      <div class="mx-auto flex max-w-5xl items-center gap-5 px-4 py-3 sm:px-6">
+        <a
+          href={resolve('/')}
+          class="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
+        >
+          <svg
+            class="h-5 w-5 text-accent"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M2 13.5 21 4l-6.5 16-3.2-6.3L4.5 10Z" />
+          </svg>
+          Jetstream
+        </a>
 
-<div class="min-h-screen bg-slate-950 text-slate-100">
-  <nav class="border-b border-slate-800 bg-slate-900/50">
-    <div class="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
-      <span class="font-semibold">Jetstream</span>
-      {#if data.session !== null}
-        <div class="flex gap-1">
+        <div class="hidden flex-1 items-center justify-center gap-1 sm:flex">
           {#each links as link (link.href)}
+            {@const active = page.url.pathname === link.href}
             <a
               href={resolve(link.href)}
-              class="rounded-md px-3 py-1.5 text-sm {page.url.pathname === link.href
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-300 hover:bg-slate-800/60'}"
+              aria-current={active ? 'page' : undefined}
+              class="rounded-full px-3 py-1.5 text-sm transition-colors {active
+                ? 'bg-accent-wash font-medium text-accent'
+                : 'text-ink-soft hover:bg-white/60 hover:text-ink'}"
             >
               {link.label}
             </a>
           {/each}
         </div>
-        <div class="ml-auto flex items-center gap-3 text-sm text-slate-400">
-          {#if (data.session.user?.name ?? '') !== ''}<span>{data.session.user?.name}</span>{/if}
+
+        <div class="ml-auto flex items-center gap-3 text-sm text-ink-soft sm:ml-0">
+          {#if (data.session.user?.name ?? '') !== ''}
+            <span class="hidden sm:inline">{data.session.user?.name}</span>
+          {/if}
           <button
             onclick={() => void signOut()}
-            class="rounded-md px-3 py-1.5 hover:bg-slate-800/60"
+            class="rounded-full px-3 py-1.5 text-ink-mute transition-colors hover:bg-white/60 hover:text-ink"
           >
             Sign out
           </button>
         </div>
-      {/if}
-    </div>
-  </nav>
+      </div>
+
+      <!-- Mobile section links -->
+      <div class="flex gap-1 overflow-x-auto px-4 pb-2 sm:hidden">
+        {#each links as link (link.href)}
+          {@const active = page.url.pathname === link.href}
+          <a
+            href={resolve(link.href)}
+            aria-current={active ? 'page' : undefined}
+            class="rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors {active
+              ? 'bg-accent-wash font-medium text-accent'
+              : 'text-ink-soft hover:bg-white/60'}"
+          >
+            {link.label}
+          </a>
+        {/each}
+      </div>
+    </nav>
+  {/if}
 
   {@render children()}
 </div>
