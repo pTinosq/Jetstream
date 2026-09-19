@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { toIsoWithOffset } from '../../../datetime.ts';
 import type { FlightCandidate } from '../../../flights/candidate.ts';
-import { mapOpenSkyDepartures } from './opensky-map.ts';
+import { mapOpenSkyRoute } from './opensky-map.ts';
 import type { FlightSearchParams, FlightSearchProvider } from './types.ts';
 
 const TOKEN_URL =
@@ -65,14 +65,24 @@ export class OpenSkyProvider implements FlightSearchProvider {
     if (from.icao === null || to.icao === null) return [];
 
     const { begin, end } = dayWindow(date, from.timezone ?? 'UTC');
-    const url = `${API_BASE}/flights/departure?airport=${encodeURIComponent(from.icao)}&begin=${begin}&end=${end}`;
-    const response = await fetch(url, {
-      headers: { authorization: `Bearer ${await this.#accessToken()}` },
-    });
-    if (!response.ok) {
-      throw new Error(`OpenSky request failed: ${response.status} ${response.statusText}`);
+    const headers = { authorization: `Bearer ${await this.#accessToken()}` };
+
+    const departureUrl = `${API_BASE}/flights/departure?airport=${encodeURIComponent(from.icao)}&begin=${begin}&end=${end}`;
+    // Late/long flights land the next day, so widen the arrival window a day past
+    // the origin's calendar day to catch them.
+    const arrivalUrl = `${API_BASE}/flights/arrival?airport=${encodeURIComponent(to.icao)}&begin=${begin}&end=${end + 24 * 60 * 60}`;
+
+    const [departureRes, arrivalRes] = await Promise.all([
+      fetch(departureUrl, { headers }),
+      fetch(arrivalUrl, { headers }),
+    ]);
+    if (!departureRes.ok) {
+      throw new Error(`OpenSky request failed: ${departureRes.status} ${departureRes.statusText}`);
     }
-    return mapOpenSkyDepartures(await response.json(), from, to);
+    // Arrivals only enrich the match (they confirm destinations OpenSky couldn't
+    // estimate on departure). If that call fails, degrade to departures-only.
+    const arrivals: unknown = arrivalRes.ok ? await arrivalRes.json() : [];
+    return mapOpenSkyRoute(await departureRes.json(), arrivals, from, to);
   }
 
   async #accessToken(): Promise<string> {
