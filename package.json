@@ -35,7 +35,9 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.3.0",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^24",
+    "@types/topojson-client": "^3.1.5",
     "drizzle-kit": "^0.31.10",
     "drizzle-orm": "^0.45.2",
     "eslint": "^10.4.1",
@@ -55,10 +57,14 @@
   },
   "dependencies": {
     "@auth/sveltekit": "^1.11.3",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/hanken-grotesk": "^5.3.0",
     "@photostructure/tz-lookup": "^11.6.1",
     "better-sqlite3": "^13.0.2",
     "csv-parse": "^7.0.2",
     "globe.gl": "^2.46.2",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
     "zod": "^4.0.0"
   }
 }

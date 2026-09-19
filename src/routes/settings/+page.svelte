@@ -9,23 +9,20 @@
   const verified = $derived(form !== null && 'verified' in form ? form.verified : null);
   const verifyError = $derived(form !== null && 'verifyError' in form ? form.verifyError : null);
   const cleared = $derived(form !== null && 'cleared' in form);
-
-  const fieldClass =
-    'rounded-md border border-slate-700 bg-slate-900 px-3 py-2 outline-none focus:border-sky-500';
 </script>
 
-<div class="mx-auto max-w-2xl px-6 py-10 text-slate-100">
+<div class="enter mx-auto max-w-2xl px-4 py-10 sm:px-6">
   <header class="mb-8">
-    <h1 class="text-2xl font-semibold">Settings</h1>
-    <p class="text-slate-400">Configure Jetstream from here — no <code>.env</code> needed.</p>
+    <h1 class="text-3xl font-semibold">Settings</h1>
+    <p class="mt-1 text-ink-soft">Configure Jetstream from here — no <code>.env</code> needed.</p>
   </header>
 
-  <section class="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
+  <section class="glass rounded-panel p-6 sm:p-7">
     <h2 class="text-lg font-medium">Flight auto-detect (OpenSky)</h2>
-    <p class="mt-1 text-sm text-slate-400">
+    <p class="mt-1.5 text-sm leading-relaxed text-ink-soft">
       Look up real flights for a route and date. Create a free account at
       <a
-        class="text-sky-400 hover:underline"
+        class="font-medium text-accent hover:underline"
         href="https://opensky-network.org/"
         target="_blank"
         rel="noreferrer">opensky-network.org</a
@@ -34,79 +31,74 @@
 
     <div class="mt-4 text-sm">
       {#if data.opensky.source === 'db'}
-        <span class="rounded-md bg-emerald-500/10 px-2 py-1 text-emerald-300">Configured</span>
+        <span class="rounded-full bg-emerald-500/12 px-2.5 py-1 font-medium text-emerald-700">
+          Configured
+        </span>
       {:else if data.opensky.source === 'env'}
-        <span class="rounded-md bg-sky-500/10 px-2 py-1 text-sky-300">
+        <span class="rounded-full bg-accent-wash px-2.5 py-1 font-medium text-accent">
           Configured via environment variable (saving here overrides it)
         </span>
       {:else}
-        <span class="rounded-md bg-slate-700/40 px-2 py-1 text-slate-300">Not configured</span>
+        <span class="rounded-full bg-black/5 px-2.5 py-1 text-ink-soft">Not configured</span>
       {/if}
     </div>
 
     {#if saved}
       {#if verified === true}
-        <p class="mt-4 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+        <p
+          class="mt-4 rounded-control border border-emerald-600/15 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700"
+        >
           Saved and connection verified.
         </p>
       {:else}
-        <p class="mt-4 rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+        <p
+          class="mt-4 rounded-control border border-amber-600/15 bg-amber-500/10 px-3 py-2 text-sm text-amber-800"
+        >
           Saved, but the connection test failed: {verifyError}
         </p>
       {/if}
     {/if}
     {#if cleared}
-      <p class="mt-4 rounded-md bg-slate-700/30 px-3 py-2 text-sm text-slate-300">
+      <p class="mt-4 rounded-control bg-black/5 px-3 py-2 text-sm text-ink-soft">
         Credentials cleared.
       </p>
     {/if}
 
-    <form method="POST" action="?/save" use:enhance class="mt-4 flex flex-col gap-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-slate-200" for="clientId">Client ID</label>
+    <form method="POST" action="?/save" use:enhance class="mt-5 flex flex-col gap-4">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium text-ink-soft" for="clientId">Client ID</label>
         <input
           id="clientId"
           name="clientId"
           type="text"
           autocomplete="off"
           value={data.opensky.clientId ?? ''}
-          class={fieldClass}
+          class="field font-mono"
         />
         {#if errors?.clientId?.[0] !== undefined}
-          <p class="text-sm text-rose-400">{errors.clientId[0]}</p>
+          <p class="text-sm text-rose-600">{errors.clientId[0]}</p>
         {/if}
       </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-sm font-medium text-slate-200" for="clientSecret">Client secret</label>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-sm font-medium text-ink-soft" for="clientSecret">Client secret</label>
         <input
           id="clientSecret"
           name="clientSecret"
           type="password"
           autocomplete="off"
           placeholder={data.opensky.source === 'db' ? 'Enter to replace the saved secret' : ''}
-          class={fieldClass}
+          class="field font-mono"
         />
         {#if errors?.clientSecret?.[0] !== undefined}
-          <p class="text-sm text-rose-400">{errors.clientSecret[0]}</p>
+          <p class="text-sm text-rose-600">{errors.clientSecret[0]}</p>
         {/if}
       </div>
 
-      <div class="flex items-center gap-3">
-        <button
-          type="submit"
-          class="rounded-md bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500"
-        >
-          Save &amp; test
-        </button>
+      <div class="flex items-center gap-3 pt-1">
+        <button type="submit" class="btn btn-primary">Save &amp; test</button>
         {#if data.opensky.source === 'db'}
-          <button
-            type="submit"
-            formaction="?/clear"
-            class="rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800"
-          >
-            Clear
-          </button>
+          <button type="submit" formaction="?/clear" class="btn btn-ghost text-sm">Clear</button>
         {/if}
       </div>
     </form>

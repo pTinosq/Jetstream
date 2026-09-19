@@ -61,8 +61,8 @@
   }
 </script>
 
-<div class="relative flex flex-col gap-1">
-  <label class="text-sm font-medium text-slate-200" for={name}>{label}</label>
+<div class="relative flex flex-col gap-1.5">
+  <label class="text-sm font-medium text-ink-soft" for={name}>{label}</label>
   <input
     id={name}
     type="text"
@@ -71,20 +71,20 @@
     bind:value={query}
     oninput={onInput}
     onfocus={() => (open = results.length > 0)}
-    class="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none focus:border-sky-500"
+    class="field"
   />
   <input type="hidden" {name} value={selectedId} />
 
   {#if open && results.length > 0}
     <ul
-      class="absolute top-full z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-slate-700 bg-slate-900 shadow-lg"
+      class="glass absolute top-full z-20 mt-1.5 max-h-60 w-full divide-y divide-line overflow-auto rounded-control"
     >
       {#each results as airport (airport.id)}
         <li>
           <button
             type="button"
             onclick={() => choose(airport)}
-            class="block w-full px-3 py-2 text-left text-sm text-slate-100 hover:bg-slate-800"
+            class="block w-full px-3 py-2 text-left text-sm text-ink transition-colors hover:bg-accent-wash"
           >
             {displayName(airport)}
           </button>
@@ -94,6 +94,6 @@
   {/if}
 
   {#if error !== undefined}
-    <p class="text-sm text-rose-400">{error}</p>
+    <p class="text-sm text-rose-600">{error}</p>
   {/if}
 </div>
