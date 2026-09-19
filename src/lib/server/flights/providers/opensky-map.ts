@@ -16,7 +16,9 @@ const departureSchema = z.object({
   callsign: z.string().nullable(),
 });
 
-const callsignPattern = /^([A-Z]+)(\d+[A-Z]?)$/;
+// Airline prefix (letters) + flight number (digits, optionally with up to two
+// trailing letters, e.g. "79Y" or the ferry-style "7CN").
+const callsignPattern = /^([A-Z]+)(\d+[A-Z]{0,2})$/;
 
 /** Split a callsign like "BAW117" into airline "BAW" and number "117". */
 export function parseCallsign(raw: string | null): {

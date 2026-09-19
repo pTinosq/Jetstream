@@ -35,7 +35,8 @@
   // Auto-detect search state.
   let origin = $state<Airport | null>(null);
   let destination = $state<Airport | null>(null);
-  let searchDate = $state('');
+  // Default to today; auto-detect only covers recent flights anyway.
+  let searchDate = $state(new Date().toISOString().slice(0, 10));
   let searching = $state(false);
   let searched = $state(false);
   let providerConfigured = $state(true);
@@ -58,6 +59,13 @@
 
   function toLocalInput(iso: string): string {
     return iso.slice(0, 16); // "YYYY-MM-DDTHH:mm" for datetime-local
+  }
+
+  function candidateLabel(candidate: FlightCandidate): string {
+    if (candidate.airline !== null && candidate.flightNumber !== null) {
+      return `${candidate.airline} ${candidate.flightNumber}`;
+    }
+    return candidate.callsign ?? 'Unknown flight';
   }
 
   function candidateTime(iso: string): string {
@@ -174,7 +182,10 @@
           >
             {searching ? 'Searching…' : 'Find flights'}
           </button>
-          <p class="text-xs text-slate-500">Pick From, To and a date to look up flights.</p>
+          <p class="text-xs text-slate-500">
+            Pick From, To and a date to look up flights. Works best for recent flights (roughly the
+            last few weeks).
+          </p>
         </div>
 
         {#if searched && !searching}
@@ -208,10 +219,7 @@
                     onclick={() => choose(candidate)}
                     class="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-slate-800"
                   >
-                    <span class="font-medium">
-                      {candidate.airline ?? '—'}
-                      {candidate.flightNumber ?? ''}
-                    </span>
+                    <span class="font-medium">{candidateLabel(candidate)}</span>
                     <span class="text-slate-400">
                       {candidateTime(candidate.departure)}
                       {#if candidate.arrival !== null}→ {candidateTime(candidate.arrival)}{/if}
