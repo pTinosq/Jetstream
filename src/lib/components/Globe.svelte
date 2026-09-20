@@ -9,9 +9,27 @@
   let { data }: { data: GlobeData } = $props();
   let container: HTMLDivElement | undefined;
 
+  // Minimal view of the running globe.gl instance for reactive data updates.
+  interface WorldApi {
+    pointsData: (d: object[]) => unknown;
+    arcsData: (d: object[]) => unknown;
+  }
+  let world: WorldApi | undefined;
+  let ready = $state(false);
+
   // Faint landmasses, resolved once from the bundled world atlas (offline).
   const topology = worldTopo as unknown as Topology<{ countries: GeometryCollection }>;
   const countries: Feature<Geometry>[] = feature(topology, topology.objects.countries).features;
+
+  // Push new points/arcs to the live globe when the period filter changes,
+  // instead of tearing the WebGL scene down and rebuilding it.
+  $effect(() => {
+    const { points, arcs } = data;
+    if (ready && world !== undefined) {
+      world.pointsData(points);
+      world.arcsData(arcs);
+    }
+  });
 
   onMount(() => {
     let destroy: (() => void) | undefined;
@@ -21,7 +39,7 @@
       const Globe = (await import('globe.gl')).default;
       if (cancelled || container === undefined) return;
 
-      const world = new Globe(container)
+      const world_ = new Globe(container)
         .backgroundColor('rgba(0,0,0,0)')
         .showGlobe(true)
         .showGraticules(true)
@@ -58,24 +76,30 @@
         .arcLabel((d: object) => (d as GlobeArc).label);
 
       // Pale sphere so the faint land and accent routes read on a light page.
-      (world.globeMaterial() as { color: { set: (c: string) => void } }).color.set('#eef2f9');
+      (world_.globeMaterial() as { color: { set: (c: string) => void } }).color.set('#eef2f9');
 
       const fit = (): void => {
         if (container === undefined) return;
-        world.width(container.clientWidth).height(container.clientHeight);
+        world_.width(container.clientWidth).height(container.clientHeight);
       };
       fit();
-      world.pointOfView({ lat: 25, lng: 10, altitude: 2.4 });
+      world_.pointOfView({ lat: 25, lng: 10, altitude: 2.4 });
 
       // three's OrbitControls types aren't resolvable through globe.gl's d.ts.
-      const controls = world.controls() as { autoRotate: boolean; autoRotateSpeed: number };
+      const controls = world_.controls() as { autoRotate: boolean; autoRotateSpeed: number };
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.35;
+
+      // Expose the instance for reactive data updates (see the $effect above).
+      world = world_;
+      ready = true;
 
       window.addEventListener('resize', fit);
       destroy = () => {
         window.removeEventListener('resize', fit);
-        world._destructor();
+        ready = false;
+        world = undefined;
+        world_._destructor();
       };
     })();
 
