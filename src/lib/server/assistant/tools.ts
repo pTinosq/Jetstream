@@ -55,6 +55,12 @@ export const FIND_FLIGHT_TOOL: ChatTool = {
         type: 'string',
         description: 'Seat number if the text states one, e.g. "12A". Optional.',
       },
+      cabin: {
+        type: 'string',
+        enum: ['economy', 'premium_economy', 'business', 'first'],
+        description:
+          'Cabin/travel class if stated, mapped to one of these values (e.g. "Economy Plus" → premium_economy). Optional.',
+      },
       notes: {
         type: 'string',
         description:

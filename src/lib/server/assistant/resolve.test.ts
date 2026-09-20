@@ -134,7 +134,8 @@ test('falls back to text times and captures seat + notes when lookup is unavaila
       departureTimeLocal: '16:00',
       arrivalTimeLocal: '17:05',
       seat: '14C',
-      notes: 'Confirmation Y36W7E, economy',
+      cabin: 'business',
+      notes: 'Confirmation Y36W7E',
     }),
   );
   const result = await resolveFlightDraft(deps({ llm }), 'AY1337 seat 14C');
@@ -145,16 +146,28 @@ test('falls back to text times and captures seat + notes when lookup is unavaila
   expect(result.draft.arrivalLocal).toBe('2026-08-30T17:05');
   expect(result.draft.aircraftType).toBeNull();
   expect(result.draft.seat).toBe('14C');
-  expect(result.draft.notes).toBe('Confirmation Y36W7E, economy');
+  expect(result.draft.cabin).toBe('business');
+  expect(result.draft.notes).toBe('Confirmation Y36W7E');
 });
 
-test('leaves seat and notes null when the text omits them', async () => {
+test('leaves seat, cabin and notes null when the text omits them', async () => {
   const llm = new OneShotLlm(findFlight({ from: 'HEL', to: 'LHR', date: '2026-08-30' }));
   const result = await resolveFlightDraft(deps({ llm }), 'HEL to LHR on 30 Aug');
   expect(result.status).toBe('draft');
   if (result.status !== 'draft') return;
   expect(result.draft.seat).toBeNull();
+  expect(result.draft.cabin).toBeNull();
   expect(result.draft.notes).toBeNull();
+});
+
+test('ignores a cabin value outside the allowed enum', async () => {
+  const llm = new OneShotLlm(
+    findFlight({ from: 'HEL', to: 'LHR', date: '2026-08-30', cabin: 'economy plus' }),
+  );
+  const result = await resolveFlightDraft(deps({ llm }), 'x');
+  expect(result.status).toBe('draft');
+  if (result.status !== 'draft') return;
+  expect(result.draft.cabin).toBeNull();
 });
 
 test('falls back to text times when the lookup throws', async () => {

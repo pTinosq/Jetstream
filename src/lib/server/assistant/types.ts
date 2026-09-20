@@ -1,4 +1,5 @@
 import type { Airport } from '../../airports/types.ts';
+import type { CabinClass } from '../../flights/schema.ts';
 
 /** A resolved flight ready to prefill the add-flight form. Nothing is saved. */
 export interface AssistantDraft {
@@ -14,6 +15,8 @@ export interface AssistantDraft {
   photoUrl: string | null;
   /** Seat, if stated in the text. */
   seat: string | null;
+  /** Cabin class, if stated in the text. */
+  cabin: CabinClass | null;
   /** Extra details from the text to keep in the flight's notes. */
   notes: string | null;
   /** True when resolved against a real OpenSky candidate (exact times). */

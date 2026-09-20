@@ -32,6 +32,7 @@
   let aircraftPhoto = $state<string | null>(null);
   let aircraftLookup = $state<'idle' | 'loading' | 'done'>('idle');
   let seat = $state('');
+  let cabinClass = $state('');
   let notes = $state('');
 
   // Auto-detect search state.
@@ -64,6 +65,7 @@
     registration: string | null;
     photoUrl: string | null;
     seat: string | null;
+    cabin: (typeof CABIN_CLASSES)[number] | null;
     notes: string | null;
     matchedFlight: boolean;
   }
@@ -156,6 +158,7 @@
     aircraftPhoto = draft.photoUrl;
     aircraftLookup = draft.aircraftType !== null ? 'done' : 'idle';
     seat = draft.seat ?? '';
+    cabinClass = draft.cabin ?? '';
     notes = draft.notes ?? '';
     aiMatched = draft.matchedFlight;
     if (draft.departureLocal !== null) searchDate = draft.departureLocal.slice(0, 10);
@@ -468,7 +471,7 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-medium text-ink-soft" for="cabinClass">Cabin</label>
-          <select id="cabinClass" name="cabinClass" class="field">
+          <select id="cabinClass" name="cabinClass" bind:value={cabinClass} class="field">
             <option value="">Not set</option>
             {#each CABIN_CLASSES as cabin (cabin)}
               <option value={cabin}>{cabinLabels[cabin]}</option>
