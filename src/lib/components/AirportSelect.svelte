@@ -59,6 +59,22 @@
     open = false;
     onSelect?.(airport);
   }
+
+  /** Set the selection programmatically (e.g. from the AI assistant). */
+  export function setSelected(airport: Airport | null): void {
+    clearTimeout(debounce);
+    results = [];
+    open = false;
+    if (airport === null) {
+      selectedId = '';
+      query = '';
+      onSelect?.(null);
+      return;
+    }
+    selectedId = airport.id;
+    query = displayName(airport);
+    onSelect?.(airport);
+  }
 </script>
 
 <div class="relative flex flex-col gap-1.5">

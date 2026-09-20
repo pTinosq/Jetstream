@@ -33,9 +33,17 @@ target (keep it portable to Docker/other hosts).
 - **Aircraft lookup:** each candidate carries the OpenSky `icao24`; adsbdb
   (`src/lib/server/aircraft/`, free, no key) resolves it to registration/type/
   photo, exposed at `/api/aircraft` and auto-filled when a flight is picked.
-- **Config:** instance settings (e.g. OpenSky keys) live in the `settings` table,
-  set via the in-app **Settings** page (`src/lib/server/settings/`). Credentials
-  resolve DB-first, then `OPENSKY_CLIENT_ID`/`SECRET` env as fallback.
+- **AI assistant (optional):** `src/lib/server/assistant/` turns free text / a
+  pasted booking email into a prefilled flight. `resolve.ts` runs an agentic
+  loop over an `LlmClient` (OpenRouter, OpenAI-compatible) with tools
+  (`tools.ts`: `search_airports`, `search_flights`, terminal `propose_flight`)
+  that reuse the airport/flight/aircraft layers. Exposed at `/api/assistant`;
+  never saves — returns a draft the user reviews. LLM client is injected so the
+  loop is unit-tested offline with a scripted client.
+- **Config:** instance settings (e.g. OpenSky keys, OpenRouter key + model) live
+  in the `settings` table, set via the in-app **Settings** page
+  (`src/lib/server/settings/`). Credentials resolve DB-first, then env as
+  fallback (`OPENSKY_CLIENT_ID`/`SECRET`, `OPENROUTER_API_KEY`/`OPENROUTER_MODEL`).
 - **DB access:** import `getDb()` (lazy) from `$lib/server/db`, never a
   module-level connection — so `vite build` works without a database.
 - **Auth:** Auth.js (`@auth/sveltekit`) configured dynamically from DB settings

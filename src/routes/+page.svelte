@@ -44,6 +44,39 @@
   let candidates = $state<FlightCandidate[]>([]);
   let airlineFilter = $state('');
 
+  // AirportSelect instances, so the assistant can set From/To programmatically.
+  // Typed by the exported API we call (bind:this accepts the instance).
+  type AirportSetter = { setSelected: (airport: Airport | null) => void };
+  let fromSelect = $state<AirportSetter>();
+  let toSelect = $state<AirportSetter>();
+
+  // AI assistant (paste free text / an email → prefilled draft).
+  interface AssistantDraft {
+    origin: Airport | null;
+    destination: Airport | null;
+    airline: string | null;
+    flightNumber: string | null;
+    departureLocal: string | null;
+    arrivalLocal: string | null;
+    aircraftType: string | null;
+    registration: string | null;
+    photoUrl: string | null;
+    matchedFlight: boolean;
+    note: string | null;
+  }
+  type AssistantResponse =
+    | { status: 'draft'; draft: AssistantDraft }
+    | { status: 'question'; message: string }
+    | { status: 'error'; error: string };
+
+  let aiText = $state('');
+  let aiBusy = $state(false);
+  let aiError = $state<string | null>(null);
+  let aiMessage = $state<string | null>(null);
+  let aiNote = $state<string | null>(null);
+  // null = no result yet; true = grounded on a tracked flight; false = from text.
+  let aiMatched = $state<boolean | null>(null);
+
   const canSearch = $derived(origin !== null && destination !== null && searchDate !== '');
 
   const airlineOptions = $derived(
@@ -109,6 +142,55 @@
     if (candidate.icao24 !== null) void enrichAircraft(candidate.icao24);
   }
 
+  function applyDraft(draft: AssistantDraft): void {
+    fromSelect?.setSelected(draft.origin);
+    toSelect?.setSelected(draft.destination);
+    airline = draft.airline ?? '';
+    flightNumber = draft.flightNumber ?? '';
+    departure = draft.departureLocal ?? '';
+    arrival = draft.arrivalLocal ?? '';
+    aircraftType = draft.aircraftType ?? '';
+    aircraftRegistration = draft.registration ?? '';
+    aircraftPhoto = draft.photoUrl;
+    aircraftLookup = draft.aircraftType !== null ? 'done' : 'idle';
+    aiNote = draft.note;
+    aiMatched = draft.matchedFlight;
+    if (draft.departureLocal !== null) searchDate = draft.departureLocal.slice(0, 10);
+  }
+
+  // Enter submits (like a chat box); Shift+Enter inserts a newline. Pasting is
+  // unaffected — it never fires an Enter keydown.
+  function onAiKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void runAssistant();
+    }
+  }
+
+  async function runAssistant(): Promise<void> {
+    if (aiText.trim() === '' || aiBusy) return;
+    aiBusy = true;
+    aiError = null;
+    aiMessage = null;
+    aiNote = null;
+    aiMatched = null;
+    try {
+      const response = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ text: aiText }),
+      });
+      const payload = (await response.json()) as AssistantResponse;
+      if (payload.status === 'draft') applyDraft(payload.draft);
+      else if (payload.status === 'question') aiMessage = payload.message;
+      else aiError = payload.error;
+    } catch {
+      aiError = 'Could not reach the assistant.';
+    } finally {
+      aiBusy = false;
+    }
+  }
+
   // Resolve the specific airframe (registration, type, photo) from its icao24.
   async function enrichAircraft(icao24: string): Promise<void> {
     aircraftLookup = 'loading';
@@ -141,9 +223,59 @@
       </p>
     {/if}
 
+    <!-- AI assistant: paste a sentence or a booking email → prefilled draft. -->
+    <div class="mb-6 rounded-panel border border-line bg-white/45 p-4">
+      <label class="text-sm font-medium text-ink-soft" for="aiText"
+        >Describe or paste a flight</label
+      >
+      <p class="mt-1 mb-2.5 text-xs leading-relaxed text-ink-mute">
+        e.g. “Finnair flight on the 18th of Sept 26, landed Helsinki 12:00 local” — or paste a
+        booking confirmation email. Press <kbd class="font-mono">Enter</kbd> to fill,
+        <kbd class="font-mono">Shift</kbd>+<kbd class="font-mono">Enter</kbd> for a new line.
+      </p>
+      <textarea
+        id="aiText"
+        bind:value={aiText}
+        onkeydown={onAiKeydown}
+        rows="3"
+        placeholder="Type the flight details, or paste an email…"
+        class="field"></textarea>
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onclick={runAssistant}
+          disabled={aiText.trim() === '' || aiBusy}
+          class="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {aiBusy ? 'Reading…' : 'Fill from text'}
+        </button>
+        {#if aiMatched === true}
+          <span
+            class="rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-medium text-emerald-700"
+          >
+            ✓ Matched to a tracked flight
+          </span>
+        {:else if aiMatched === false}
+          <span class="rounded-full bg-amber-500/12 px-2.5 py-1 text-xs font-medium text-amber-800">
+            From your text — not verified against tracking
+          </span>
+        {/if}
+        {#if aiMessage !== null}
+          <p class="text-sm text-amber-700">{aiMessage}</p>
+        {/if}
+        {#if aiError !== null}
+          <p class="text-sm text-rose-600">{aiError}</p>
+        {/if}
+      </div>
+      {#if aiNote !== null}
+        <p class="mt-2 text-xs text-ink-mute">Note: {aiNote}</p>
+      {/if}
+    </div>
+
     <form method="POST" action="?/create" use:enhance class="flex flex-col gap-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AirportSelect
+          bind:this={fromSelect}
           name="originId"
           label="From"
           error={errors?.originId?.[0]}
@@ -152,6 +284,7 @@
           }}
         />
         <AirportSelect
+          bind:this={toSelect}
           name="destinationId"
           label="To"
           error={errors?.destinationId?.[0]}
