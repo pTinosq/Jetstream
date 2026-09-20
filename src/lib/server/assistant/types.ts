@@ -12,10 +12,12 @@ export interface AssistantDraft {
   aircraftType: string | null;
   registration: string | null;
   photoUrl: string | null;
+  /** Seat, if stated in the text. */
+  seat: string | null;
+  /** Extra details from the text to keep in the flight's notes. */
+  notes: string | null;
   /** True when resolved against a real OpenSky candidate (exact times). */
   matchedFlight: boolean;
-  /** Optional aside from the assistant (e.g. what it couldn't confirm). */
-  note: string | null;
 }
 
 export type AssistantResult =

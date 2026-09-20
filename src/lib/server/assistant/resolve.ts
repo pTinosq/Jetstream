@@ -92,8 +92,9 @@ async function buildDraft(
     aircraftType,
     registration,
     photoUrl,
+    seat: str(args.seat),
+    notes: str(args.notes),
     matchedFlight: candidate !== undefined,
-    note: str(args.note),
   };
 }
 

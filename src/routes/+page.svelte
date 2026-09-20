@@ -31,6 +31,8 @@
   let aircraftRegistration = $state('');
   let aircraftPhoto = $state<string | null>(null);
   let aircraftLookup = $state<'idle' | 'loading' | 'done'>('idle');
+  let seat = $state('');
+  let notes = $state('');
 
   // Auto-detect search state.
   let origin = $state<Airport | null>(null);
@@ -61,8 +63,9 @@
     aircraftType: string | null;
     registration: string | null;
     photoUrl: string | null;
+    seat: string | null;
+    notes: string | null;
     matchedFlight: boolean;
-    note: string | null;
   }
   type AssistantResponse =
     | { status: 'draft'; draft: AssistantDraft }
@@ -73,7 +76,6 @@
   let aiBusy = $state(false);
   let aiError = $state<string | null>(null);
   let aiMessage = $state<string | null>(null);
-  let aiNote = $state<string | null>(null);
   // null = no result yet; true = grounded on a tracked flight; false = from text.
   let aiMatched = $state<boolean | null>(null);
 
@@ -153,7 +155,8 @@
     aircraftRegistration = draft.registration ?? '';
     aircraftPhoto = draft.photoUrl;
     aircraftLookup = draft.aircraftType !== null ? 'done' : 'idle';
-    aiNote = draft.note;
+    seat = draft.seat ?? '';
+    notes = draft.notes ?? '';
     aiMatched = draft.matchedFlight;
     if (draft.departureLocal !== null) searchDate = draft.departureLocal.slice(0, 10);
   }
@@ -172,7 +175,6 @@
     aiBusy = true;
     aiError = null;
     aiMessage = null;
-    aiNote = null;
     aiMatched = null;
     try {
       const response = await fetch('/api/assistant', {
@@ -267,9 +269,6 @@
           <p class="text-sm text-rose-600">{aiError}</p>
         {/if}
       </div>
-      {#if aiNote !== null}
-        <p class="mt-2 text-xs text-ink-mute">Note: {aiNote}</p>
-      {/if}
     </div>
 
     <form method="POST" action="?/create" use:enhance class="flex flex-col gap-6">
@@ -457,7 +456,14 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-medium text-ink-soft" for="seat">Seat</label>
-          <input id="seat" name="seat" type="text" placeholder="e.g. 12A" class="field font-mono" />
+          <input
+            id="seat"
+            name="seat"
+            type="text"
+            bind:value={seat}
+            placeholder="e.g. 12A"
+            class="field font-mono"
+          />
         </div>
 
         <div class="flex flex-col gap-1.5">
@@ -472,7 +478,7 @@
 
         <div class="flex flex-col gap-1.5 sm:col-span-2">
           <label class="text-sm font-medium text-ink-soft" for="notes">Notes</label>
-          <textarea id="notes" name="notes" rows="2" class="field"></textarea>
+          <textarea id="notes" name="notes" rows="2" bind:value={notes} class="field"></textarea>
         </div>
       </div>
 

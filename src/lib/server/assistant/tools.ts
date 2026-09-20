@@ -51,7 +51,15 @@ export const FIND_FLIGHT_TOOL: ChatTool = {
         description:
           'Scheduled local arrival time at the destination if stated, "HH:mm". Optional.',
       },
-      note: { type: 'string', description: 'Anything notable or uncertain, kept short. Optional.' },
+      seat: {
+        type: 'string',
+        description: 'Seat number if the text states one, e.g. "12A". Optional.',
+      },
+      notes: {
+        type: 'string',
+        description:
+          'Any other useful details worth keeping as notes (confirmation code, cabin/fare, meal, etc.). Optional.',
+      },
     },
     required: ['from', 'to', 'date'],
     additionalProperties: false,
