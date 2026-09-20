@@ -1,7 +1,13 @@
 import { test, expect, beforeEach } from 'vitest';
 import { memoryDb } from '../db/testing.ts';
 import { airports } from '../db/schema.ts';
-import { createFlight, listFlights } from './repository.ts';
+import {
+  createFlight,
+  deleteFlight,
+  getFlightById,
+  listFlights,
+  updateFlight,
+} from './repository.ts';
 import type { Db } from '../db/client.ts';
 import type { FlightInput } from '../../flights/schema.ts';
 
@@ -78,4 +84,43 @@ test('orders most recent departure first', async () => {
 
 test('throws for an unknown airport', () => {
   expect(() => createFlight(db, input({ destinationId: 'nope' }))).toThrow(/Unknown destination/);
+});
+
+test('getFlightById returns the flight with airports, or undefined', async () => {
+  createFlight(db, input({ airline: 'BA' }));
+  const [flight] = await listFlights(db);
+  const found = await getFlightById(db, flight?.id ?? '');
+  expect(found?.airline).toBe('BA');
+  expect(found?.origin.iata).toBe('LHR');
+  expect(await getFlightById(db, 'missing')).toBeUndefined();
+});
+
+test('updateFlight changes fields and re-derives times from the new route', async () => {
+  createFlight(db, input({ departure: '2026-03-01T09:00' }));
+  const [flight] = await listFlights(db);
+  updateFlight(
+    db,
+    flight?.id ?? '',
+    input({
+      destinationId: 'jfk',
+      departure: '2026-03-01T09:00',
+      arrival: '2026-03-01T12:30',
+      seat: '3A',
+    }),
+  );
+  const updated = await getFlightById(db, flight?.id ?? '');
+  expect(updated?.destination.iata).toBe('JFK');
+  expect(updated?.seat).toBe('3A');
+  expect(updated?.arrival).toBe('2026-03-01T12:30:00-05:00');
+});
+
+test('updateFlight throws for an unknown flight id', () => {
+  expect(() => updateFlight(db, 'missing', input())).toThrow(/Unknown flight/);
+});
+
+test('deleteFlight removes the flight', async () => {
+  createFlight(db, input());
+  const [flight] = await listFlights(db);
+  deleteFlight(db, flight?.id ?? '');
+  expect(await listFlights(db)).toHaveLength(0);
 });
