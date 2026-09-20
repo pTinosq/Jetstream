@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { getDb } from '$lib/server/db';
 import { deleteFlight, getFlightById, updateFlight } from '$lib/server/flights/repository';
@@ -25,11 +25,11 @@ export const actions: Actions = {
     }
 
     updateFlight(getDb(), params.id, parsed.data);
-    redirect(303, '/');
+    return { updated: true };
   },
 
   delete: ({ params }) => {
     deleteFlight(getDb(), params.id);
-    redirect(303, '/');
+    return { deleted: true };
   },
 };

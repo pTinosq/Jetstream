@@ -1,5 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import type { SubmitFunction } from '@sveltejs/kit';
+  import { toast } from '$lib/toast';
   import type { PageData, ActionData } from './$types';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -11,17 +13,25 @@
       ? (form.errors as Record<string, string[] | undefined>)
       : undefined,
   );
-  const saved = $derived(form !== null && 'saved' in form);
-  const verified = $derived(form !== null && 'verified' in form ? form.verified : null);
-  const verifyError = $derived(form !== null && 'verifyError' in form ? form.verifyError : null);
-  const cleared = $derived(form !== null && 'cleared' in form);
 
-  const aiSaved = $derived(form !== null && 'aiSaved' in form);
-  const aiVerified = $derived(form !== null && 'aiVerified' in form ? form.aiVerified : null);
-  const aiVerifyError = $derived(
-    form !== null && 'aiVerifyError' in form ? form.aiVerifyError : null,
-  );
-  const aiCleared = $derived(form !== null && 'aiCleared' in form);
+  // Save/clear feedback goes to toasts; validation errors stay inline per field.
+  const onSubmit: SubmitFunction = () => {
+    return async ({ result, update }) => {
+      await update();
+      if (result.type !== 'success') return;
+      const d = (result.data ?? {}) as Record<string, unknown>;
+      if ('cleared' in d || 'aiCleared' in d) {
+        toast('Credentials cleared');
+      } else if ('saved' in d || 'aiSaved' in d) {
+        const ok = d.verified === true || d.aiVerified === true;
+        const detail = typeof d.verifyError === 'string' ? d.verifyError : '';
+        toast(
+          ok ? 'Saved and connection verified' : `Saved, but the test failed: ${detail}`.trim(),
+          ok ? 'success' : 'error',
+        );
+      }
+    };
+  };
 </script>
 
 <div class="enter mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -51,28 +61,7 @@
       {/if}
     </div>
 
-    {#if saved}
-      {#if verified === true}
-        <p
-          class="mt-4 rounded-control border border-emerald-600/15 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700"
-        >
-          Saved and connection verified.
-        </p>
-      {:else}
-        <p
-          class="mt-4 rounded-control border border-amber-600/15 bg-amber-500/10 px-3 py-2 text-sm text-amber-800"
-        >
-          Saved, but the connection test failed: {verifyError}
-        </p>
-      {/if}
-    {/if}
-    {#if cleared}
-      <p class="mt-4 rounded-control bg-black/5 px-3 py-2 text-sm text-ink-soft">
-        Credentials cleared.
-      </p>
-    {/if}
-
-    <form method="POST" action="?/save" use:enhance class="mt-5 flex flex-col gap-4">
+    <form method="POST" action="?/save" use:enhance={onSubmit} class="mt-5 flex flex-col gap-4">
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-medium text-ink-soft" for="clientId">Client ID</label>
         <input
@@ -139,28 +128,7 @@
       {/if}
     </div>
 
-    {#if aiSaved}
-      {#if aiVerified === true}
-        <p
-          class="mt-4 rounded-control border border-emerald-600/15 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700"
-        >
-          Saved and connection verified.
-        </p>
-      {:else}
-        <p
-          class="mt-4 rounded-control border border-amber-600/15 bg-amber-500/10 px-3 py-2 text-sm text-amber-800"
-        >
-          Saved, but the connection test failed: {aiVerifyError}
-        </p>
-      {/if}
-    {/if}
-    {#if aiCleared}
-      <p class="mt-4 rounded-control bg-black/5 px-3 py-2 text-sm text-ink-soft">
-        Credentials cleared.
-      </p>
-    {/if}
-
-    <form method="POST" action="?/saveAi" use:enhance class="mt-5 flex flex-col gap-4">
+    <form method="POST" action="?/saveAi" use:enhance={onSubmit} class="mt-5 flex flex-col gap-4">
       <div class="flex flex-col gap-1.5">
         <label class="text-sm font-medium text-ink-soft" for="apiKey">API key</label>
         <input

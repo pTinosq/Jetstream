@@ -1,7 +1,10 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { enhance } from '$app/forms';
+  import type { SubmitFunction } from '@sveltejs/kit';
   import { resolve } from '$app/paths';
+  import { goto } from '$app/navigation';
+  import { toast } from '$lib/toast';
   import AirportSelect from '$lib/components/AirportSelect.svelte';
   import { CABIN_CLASSES } from '$lib/flights/schema';
   import type { PageData, ActionData } from './$types';
@@ -31,9 +34,29 @@
   let cabinClass = $state(f.cabinClass ?? '');
   let notes = $state(f.notes ?? '');
 
-  function confirmDelete(event: Event): void {
-    if (!confirm('Delete this flight? This cannot be undone.')) event.preventDefault();
-  }
+  const onUpdate: SubmitFunction = () => {
+    return async ({ result, update }) => {
+      if (result.type === 'success') {
+        toast('Flight updated');
+        await goto(resolve('/'));
+        return;
+      }
+      await update(); // validation failure → show inline field errors
+    };
+  };
+
+  const onDelete: SubmitFunction = ({ cancel }) => {
+    if (!confirm('Delete this flight? This cannot be undone.')) {
+      cancel();
+      return;
+    }
+    return async ({ result }) => {
+      if (result.type === 'success') {
+        toast('Flight deleted');
+        await goto(resolve('/'));
+      }
+    };
+  };
 </script>
 
 <div class="enter mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -44,7 +67,7 @@
   <section class="glass mt-4 rounded-panel p-6 sm:p-7">
     <h2 class="mb-5 text-lg font-medium">Edit flight</h2>
 
-    <form method="POST" action="?/update" use:enhance class="flex flex-col gap-6">
+    <form method="POST" action="?/update" use:enhance={onUpdate} class="flex flex-col gap-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AirportSelect
           name="originId"
@@ -154,7 +177,7 @@
     </form>
   </section>
 
-  <form method="POST" action="?/delete" onsubmit={confirmDelete} class="mt-4">
+  <form method="POST" action="?/delete" use:enhance={onDelete} class="mt-4">
     <button type="submit" class="text-sm text-rose-600 transition-colors hover:text-rose-700">
       Delete flight
     </button>

@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { resolve } from '$app/paths';
   import { signOut } from '@auth/sveltekit/client';
+  import Toaster from '$lib/components/Toaster.svelte';
   import type { Snippet } from 'svelte';
   import type { LayoutData } from './$types';
 
@@ -87,3 +88,5 @@
 
   {@render children()}
 </div>
+
+<Toaster />
