@@ -1,12 +1,13 @@
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { getDb } from '$lib/server/db';
-import { createFlight, listFlights } from '$lib/server/flights/repository';
+import { createFlight, listAircraftTypes, listFlights } from '$lib/server/flights/repository';
 import { flightInputSchema } from '$lib/flights/schema';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-  return { flights: await listFlights(getDb()) };
+  const db = getDb();
+  return { flights: await listFlights(db), aircraftTypes: listAircraftTypes(db) };
 };
 
 export const actions: Actions = {

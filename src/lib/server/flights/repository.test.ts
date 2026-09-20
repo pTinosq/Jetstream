@@ -5,6 +5,7 @@ import {
   createFlight,
   deleteFlight,
   getFlightById,
+  listAircraftTypes,
   listFlights,
   updateFlight,
 } from './repository.ts';
@@ -123,4 +124,16 @@ test('deleteFlight removes the flight', async () => {
   const [flight] = await listFlights(db);
   deleteFlight(db, flight?.id ?? '');
   expect(await listFlights(db)).toHaveLength(0);
+});
+
+test('listAircraftTypes returns distinct types, most used first', () => {
+  createFlight(db, input({ aircraftType: 'Airbus A320neo' }));
+  createFlight(db, input({ aircraftType: 'Boeing 737' }));
+  createFlight(db, input({ aircraftType: 'Airbus A320neo' }));
+  createFlight(db, input({ aircraftType: null }));
+  expect(listAircraftTypes(db)).toEqual(['Airbus A320neo', 'Boeing 737']);
+});
+
+test('listAircraftTypes is empty when nothing is logged', () => {
+  expect(listAircraftTypes(db)).toEqual([]);
 });

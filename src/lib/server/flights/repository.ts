@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, isNotNull, sql } from 'drizzle-orm';
 import { toIsoWithOffset } from '../../datetime.ts';
 import type { FlightInput } from '../../flights/schema.ts';
 import type { Db } from '../db/client.ts';
@@ -51,6 +51,23 @@ export function updateFlight(db: Db, id: string, input: FlightInput): void {
 /** Remove a flight. */
 export function deleteFlight(db: Db, id: string): void {
   db.delete(flights).where(eq(flights.id, id)).run();
+}
+
+/**
+ * Distinct aircraft types already logged, most frequently used first — powers
+ * the type-to-pick suggestions so a repeat aircraft (e.g. "Airbus A320neo")
+ * doesn't have to be retyped each time.
+ */
+export function listAircraftTypes(db: Db): string[] {
+  return db
+    .select({ type: flights.aircraftType })
+    .from(flights)
+    .where(isNotNull(flights.aircraftType))
+    .groupBy(flights.aircraftType)
+    .orderBy(sql`count(*) desc`)
+    .all()
+    .map((row) => row.type)
+    .filter((type): type is string => type !== null && type !== '');
 }
 
 /** A single flight with its airports resolved, or undefined if not found. */

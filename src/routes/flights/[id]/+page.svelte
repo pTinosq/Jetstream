@@ -6,6 +6,7 @@
   import { goto } from '$app/navigation';
   import { toast } from '$lib/toast';
   import AirportSelect from '$lib/components/AirportSelect.svelte';
+  import AircraftTypeSelect from '$lib/components/AircraftTypeSelect.svelte';
   import { CABIN_CLASSES } from '$lib/flights/schema';
   import type { PageData, ActionData } from './$types';
 
@@ -127,12 +128,11 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-medium text-ink-soft" for="aircraftType">Aircraft type</label>
-          <input
+          <AircraftTypeSelect
             id="aircraftType"
             name="aircraftType"
-            type="text"
             bind:value={aircraftType}
-            class="field"
+            suggestions={data.aircraftTypes}
           />
         </div>
 

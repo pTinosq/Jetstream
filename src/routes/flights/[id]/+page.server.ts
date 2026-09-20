@@ -1,14 +1,20 @@
 import { error, fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { getDb } from '$lib/server/db';
-import { deleteFlight, getFlightById, updateFlight } from '$lib/server/flights/repository';
+import {
+  deleteFlight,
+  getFlightById,
+  listAircraftTypes,
+  updateFlight,
+} from '$lib/server/flights/repository';
 import { flightInputSchema } from '$lib/flights/schema';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
-  const flight = await getFlightById(getDb(), params.id);
+  const db = getDb();
+  const flight = await getFlightById(db, params.id);
   if (flight === undefined) error(404, 'Flight not found');
-  return { flight };
+  return { flight, aircraftTypes: listAircraftTypes(db) };
 };
 
 export const actions: Actions = {

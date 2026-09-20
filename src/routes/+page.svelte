@@ -4,6 +4,7 @@
   import { resolve } from '$app/paths';
   import { toast } from '$lib/toast';
   import AirportSelect from '$lib/components/AirportSelect.svelte';
+  import AircraftTypeSelect from '$lib/components/AircraftTypeSelect.svelte';
   import { formatWallClock } from '$lib/datetime';
   import { CABIN_CLASSES } from '$lib/flights/schema';
   import type { Airport } from '$lib/airports/types';
@@ -454,13 +455,12 @@
                 >· looking up…</span
               >{/if}
           </label>
-          <input
+          <AircraftTypeSelect
             id="aircraftType"
             name="aircraftType"
-            type="text"
             bind:value={aircraftType}
-            placeholder="e.g. A380"
-            class="field"
+            suggestions={data.aircraftTypes}
+            placeholder="e.g. Airbus A320neo"
           />
         </div>
 
