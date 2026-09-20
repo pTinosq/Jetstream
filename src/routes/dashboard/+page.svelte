@@ -26,11 +26,6 @@
 </script>
 
 <div class="enter mx-auto max-w-5xl px-4 py-10 sm:px-6">
-  <header class="mb-8">
-    <h1 class="text-3xl font-semibold">Dashboard</h1>
-    <p class="mt-1 text-ink-soft">Your flying, by the numbers.</p>
-  </header>
-
   {#if stats.totalFlights === 0}
     <div class="glass rounded-panel p-8 text-center text-sm text-ink-soft">
       No flights logged yet. Add some on the Flights page.

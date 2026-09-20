@@ -130,11 +130,6 @@
 </script>
 
 <div class="enter mx-auto max-w-5xl px-4 py-10 sm:px-6">
-  <header class="mb-8">
-    <h1 class="text-3xl font-semibold">Flights</h1>
-    <p class="mt-1 text-ink-soft">Log the flights you've taken and plan to take.</p>
-  </header>
-
   <section class="glass mb-10 rounded-panel p-6 sm:p-7">
     <h2 class="mb-5 text-lg font-medium">Add a flight</h2>
 
