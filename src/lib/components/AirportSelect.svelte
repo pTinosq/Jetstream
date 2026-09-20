@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import type { Airport } from '$lib/airports/types';
 
   let {
@@ -6,18 +7,22 @@
     label,
     placeholder = 'Search by code or city…',
     error,
+    initial = null,
     onSelect,
   }: {
     name: string;
     label: string;
     placeholder?: string;
     error?: string | undefined;
+    /** Pre-selected airport (e.g. when editing an existing flight). */
+    initial?: Airport | null;
     onSelect?: (airport: Airport | null) => void;
   } = $props();
 
-  let query = $state('');
   let results = $state<Airport[]>([]);
-  let selectedId = $state('');
+  // Seed once from `initial`; not meant to react to later prop changes.
+  let selectedId = $state(untrack(() => initial?.id ?? ''));
+  let query = $state(untrack(() => (initial !== null ? displayName(initial) : '')));
   let open = $state(false);
   let debounce: ReturnType<typeof setTimeout> | undefined;
 

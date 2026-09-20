@@ -511,11 +511,12 @@
                 <th class="px-5 py-3 font-medium">Flight</th>
                 <th class="px-5 py-3 font-medium">Aircraft</th>
                 <th class="px-5 py-3 font-medium">Seat</th>
+                <th class="px-5 py-3"><span class="sr-only">Edit</span></th>
               </tr>
             </thead>
             <tbody>
               {#each data.flights as flight (flight.id)}
-                <tr class="border-t border-line/70 transition-colors hover:bg-white/55">
+                <tr class="group border-t border-line/70 transition-colors hover:bg-white/55">
                   <td class="px-5 py-3 font-mono whitespace-nowrap text-ink-soft">
                     {formatWallClock(flight.departure)}
                   </td>
@@ -529,6 +530,27 @@
                   </td>
                   <td class="px-5 py-3 text-ink-soft">{flight.aircraftType ?? '—'}</td>
                   <td class="px-5 py-3 font-mono text-ink-soft">{flight.seat ?? '—'}</td>
+                  <td class="px-5 py-3 text-right">
+                    <a
+                      href={resolve('/flights/[id]', { id: flight.id })}
+                      aria-label="Edit flight"
+                      class="inline-flex text-ink-mute opacity-0 transition group-hover:opacity-100 hover:text-accent focus-visible:opacity-100"
+                    >
+                      <svg
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.6"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                    </a>
+                  </td>
                 </tr>
               {/each}
             </tbody>
