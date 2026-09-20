@@ -123,7 +123,7 @@ test('grounds on the tracked flight closest to the stated time, keeping the mark
   expect(result.draft.destination?.iata).toBe('LHR');
 });
 
-test('falls back to text times when flight lookup is unavailable', async () => {
+test('falls back to text times and captures seat + notes when lookup is unavailable', async () => {
   const llm = new OneShotLlm(
     findFlight({
       from: 'HEL',
@@ -133,17 +133,41 @@ test('falls back to text times when flight lookup is unavailable', async () => {
       flightNumber: '1337',
       departureTimeLocal: '16:00',
       arrivalTimeLocal: '17:05',
-      note: 'from email',
+      seat: '14C',
+      cabin: 'business',
+      notes: 'Confirmation Y36W7E',
     }),
   );
-  const result = await resolveFlightDraft(deps({ llm }), 'AY1337');
+  const result = await resolveFlightDraft(deps({ llm }), 'AY1337 seat 14C');
   expect(result.status).toBe('draft');
   if (result.status !== 'draft') return;
   expect(result.draft.matchedFlight).toBe(false);
   expect(result.draft.departureLocal).toBe('2026-08-30T16:00');
   expect(result.draft.arrivalLocal).toBe('2026-08-30T17:05');
   expect(result.draft.aircraftType).toBeNull();
-  expect(result.draft.note).toBe('from email');
+  expect(result.draft.seat).toBe('14C');
+  expect(result.draft.cabin).toBe('business');
+  expect(result.draft.notes).toBe('Confirmation Y36W7E');
+});
+
+test('leaves seat, cabin and notes null when the text omits them', async () => {
+  const llm = new OneShotLlm(findFlight({ from: 'HEL', to: 'LHR', date: '2026-08-30' }));
+  const result = await resolveFlightDraft(deps({ llm }), 'HEL to LHR on 30 Aug');
+  expect(result.status).toBe('draft');
+  if (result.status !== 'draft') return;
+  expect(result.draft.seat).toBeNull();
+  expect(result.draft.cabin).toBeNull();
+  expect(result.draft.notes).toBeNull();
+});
+
+test('ignores a cabin value outside the allowed enum', async () => {
+  const llm = new OneShotLlm(
+    findFlight({ from: 'HEL', to: 'LHR', date: '2026-08-30', cabin: 'economy plus' }),
+  );
+  const result = await resolveFlightDraft(deps({ llm }), 'x');
+  expect(result.status).toBe('draft');
+  if (result.status !== 'draft') return;
+  expect(result.draft.cabin).toBeNull();
 });
 
 test('falls back to text times when the lookup throws', async () => {

@@ -1,4 +1,5 @@
 import type { Aircraft } from '../../aircraft/types.ts';
+import { CABIN_CLASSES, type CabinClass } from '../../flights/schema.ts';
 import type { Db } from '../db/client.ts';
 import type { FlightSearchProvider } from '../flights/providers/types.ts';
 import type { ChatMessage, LlmClient, ToolCall } from './openrouter.ts';
@@ -39,6 +40,10 @@ function parseArgs(raw: string): Record<string, unknown> {
 
 const str = (v: unknown): string | null =>
   typeof v === 'string' && v.trim() !== '' ? v.trim() : null;
+
+function cabinClass(v: unknown): CabinClass | null {
+  return CABIN_CLASSES.find((c) => c === v) ?? null;
+}
 
 /** Combine a date and an "HH:mm" into a datetime-local string, if both present. */
 function combineDateTime(date: string | null, time: string | null): string | null {
@@ -92,8 +97,10 @@ async function buildDraft(
     aircraftType,
     registration,
     photoUrl,
+    seat: str(args.seat),
+    cabin: cabinClass(args.cabin),
+    notes: str(args.notes),
     matchedFlight: candidate !== undefined,
-    note: str(args.note),
   };
 }
 
