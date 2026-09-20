@@ -2,6 +2,7 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { authHandle } from '$lib/server/auth';
 import { getDb } from '$lib/server/db';
+import { ensureAirportsSeeded } from '$lib/server/airports/ensure-seeded';
 import { isAuthConfigured } from '$lib/server/settings/auth';
 
 const isAuthRoute = (path: string): boolean => /^\/auth(\/|$)/.test(path);
@@ -15,6 +16,10 @@ const isLoginRoute = (path: string): boolean => /^\/login(\/|$)/.test(path);
  */
 const guard: Handle = async ({ event, resolve }) => {
   const path = event.url.pathname;
+
+  // First-run convenience: seed airport data if the table is empty. Fire and
+  // forget — never blocks the request, idempotent, and no-ops once populated.
+  void ensureAirportsSeeded(getDb());
 
   if (!isAuthConfigured(getDb())) {
     // Not set up yet: everything funnels to /setup (auth routes stay reachable).
