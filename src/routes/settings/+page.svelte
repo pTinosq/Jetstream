@@ -187,8 +187,8 @@
           class="field font-mono"
         />
         <p class="text-xs text-ink-mute">
-          Any tool-calling model on OpenRouter, e.g. <code>openai/gpt-4o-mini</code> or
-          <code>anthropic/claude-3.5-haiku</code>.
+          Any tool-calling model on OpenRouter, e.g. <code>deepseek/deepseek-v4.1-flash</code> or
+          <code>openai/gpt-4o-mini</code>.
         </p>
       </div>
 

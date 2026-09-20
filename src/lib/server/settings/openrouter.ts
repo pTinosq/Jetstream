@@ -6,7 +6,7 @@ const API_KEY_KEY = 'openrouter_api_key';
 const MODEL_KEY = 'openrouter_model';
 
 /** Sensible tool-calling-capable default; overridable in Settings. */
-export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-4o-mini';
+export const DEFAULT_OPENROUTER_MODEL = 'deepseek/deepseek-v4.1-flash';
 
 export interface OpenRouterConfig {
   apiKey: string;
