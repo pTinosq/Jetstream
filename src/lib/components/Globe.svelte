@@ -86,4 +86,4 @@
   });
 </script>
 
-<div bind:this={container} class="h-[68vh] w-full"></div>
+<div bind:this={container} class="h-full w-full"></div>
