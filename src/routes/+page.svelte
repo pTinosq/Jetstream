@@ -1,6 +1,8 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import type { SubmitFunction } from '@sveltejs/kit';
   import { resolve } from '$app/paths';
+  import { toast } from '$lib/toast';
   import AirportSelect from '$lib/components/AirportSelect.svelte';
   import { formatWallClock } from '$lib/datetime';
   import { CABIN_CLASSES } from '$lib/flights/schema';
@@ -12,7 +14,6 @@
   let { data, form }: { data: PageData; form: ActionData } = $props();
 
   const errors = $derived(form !== null && 'errors' in form ? form.errors : undefined);
-  const created = $derived(form !== null && 'created' in form);
 
   const cabinLabels: Record<(typeof CABIN_CLASSES)[number], string> = {
     economy: 'Economy',
@@ -196,6 +197,44 @@
     }
   }
 
+  // Clear the whole add-flight form after a successful save; bound $state isn't
+  // reset by the native form reset, so the aircraft photo etc. would linger.
+  function resetForm(): void {
+    fromSelect?.setSelected(null);
+    toSelect?.setSelected(null);
+    origin = null;
+    destination = null;
+    airline = '';
+    flightNumber = '';
+    departure = '';
+    arrival = '';
+    aircraftType = '';
+    aircraftRegistration = '';
+    aircraftPhoto = null;
+    aircraftLookup = 'idle';
+    seat = '';
+    cabinClass = '';
+    notes = '';
+    candidates = [];
+    searched = false;
+    searchError = null;
+    airlineFilter = '';
+    aiText = '';
+    aiError = null;
+    aiMessage = null;
+    aiMatched = null;
+  }
+
+  const submitFlight: SubmitFunction = () => {
+    return async ({ result, update }) => {
+      await update();
+      if (result.type === 'success') {
+        resetForm();
+        toast('Flight added');
+      }
+    };
+  };
+
   // Resolve the specific airframe (registration, type, photo) from its icao24.
   async function enrichAircraft(icao24: string): Promise<void> {
     aircraftLookup = 'loading';
@@ -219,14 +258,6 @@
 <div class="enter mx-auto max-w-5xl px-4 py-10 sm:px-6">
   <section class="glass mb-10 rounded-panel p-6 sm:p-7">
     <h2 class="mb-5 text-lg font-medium">Add a flight</h2>
-
-    {#if created}
-      <p
-        class="mb-5 rounded-control border border-emerald-600/15 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700"
-      >
-        Flight added.
-      </p>
-    {/if}
 
     <!-- AI assistant: paste a sentence or a booking email → prefilled draft. -->
     <div class="mb-6 rounded-panel border border-line bg-white/45 p-4">
@@ -274,7 +305,7 @@
       </div>
     </div>
 
-    <form method="POST" action="?/create" use:enhance class="flex flex-col gap-6">
+    <form method="POST" action="?/create" use:enhance={submitFlight} class="flex flex-col gap-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <AirportSelect
           bind:this={fromSelect}
