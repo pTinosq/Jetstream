@@ -27,9 +27,11 @@ function systemPrompt(today: string): string {
     `Today's date is ${today}. Resolve relative dates against it.`,
     'From the user text, determine the origin, destination, date, airline, flight number, and times.',
     'Use search_airports to turn place names or codes into airport ids.',
-    'Use search_flights to find the real flight and its exact times and aircraft when possible; times are local to each airport.',
-    'When flight lookup is unavailable or finds nothing, extract what you can from the text.',
-    'Call propose_flight exactly once when done. If a search_flights candidate matches, pass its flightRef.',
+    'Whenever you have an origin, destination, and date, you MUST call search_flights and try to ground the flight on a real candidate — do not skip it.',
+    'IMPORTANT: search_flights candidates are labelled by the ATC callsign (e.g. "FIN7WG"), which usually does NOT match the marketing flight number (e.g. "AY1337"). Do not require the numbers to match. Match the user\'s flight to a candidate by route and the CLOSEST departure time; the callsign\'s leading letters are the airline ICAO code (BAW=British Airways, FIN=Finnair, DLH=Lufthansa, etc.). Candidate times are wheels-up/wheels-down, so allow ~30 min difference from scheduled times.',
+    'When you match a candidate, pass its flightRef so the exact times and aircraft are used. Still pass the airline and flightNumber from the user text (the marketing code, e.g. "AY" and "1337") so the log shows the number the user recognises.',
+    'Only fall back to times from the text when search_flights is unavailable or returns no plausible candidate for the route and date.',
+    'Call propose_flight exactly once when done.',
     'If the text lacks enough to identify a route or date and you cannot reasonably infer it, reply in plain words asking for the missing detail instead of calling propose_flight.',
   ].join(' ');
 }
@@ -89,8 +91,10 @@ async function buildDraft(
   return {
     origin,
     destination,
-    airline: candidate?.airline ?? str(args.airline),
-    flightNumber: candidate?.flightNumber ?? str(args.flightNumber),
+    // Prefer the marketing code from the text (e.g. "AY 1337") over the
+    // decorrelated callsign the candidate carries (e.g. "FIN 7WG").
+    airline: str(args.airline) ?? candidate?.airline ?? null,
+    flightNumber: str(args.flightNumber) ?? candidate?.flightNumber ?? null,
     departureLocal,
     arrivalLocal,
     aircraftType,

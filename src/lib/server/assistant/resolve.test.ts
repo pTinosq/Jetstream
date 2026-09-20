@@ -140,6 +140,48 @@ test('uses exact times and aircraft when a flight candidate is chosen', async ()
   expect(result.draft.photoUrl).toBe('https://img/plane.jpg');
 });
 
+test('keeps the marketing flight number from text over the decorrelated callsign', async () => {
+  // OpenSky labels the flight FIN7WG, but the user's text says AY1337.
+  const candidate: FlightCandidate = {
+    airline: 'FIN',
+    flightNumber: '7WG',
+    callsign: 'FIN7WG',
+    icao24: 'abc123',
+    departure: '2026-08-30T16:30:00+03:00',
+    arrival: '2026-08-30T16:58:00+01:00',
+    originIata: 'HEL',
+    destinationIata: 'LHR',
+  };
+  const provider: FlightSearchProvider = {
+    name: 'stub',
+    search: () => Promise.resolve([candidate]),
+  };
+
+  const llm = new ScriptedLlm([
+    call('c1', 'search_flights', {
+      originAirportId: '1',
+      destinationAirportId: '2',
+      date: '2026-08-30',
+    }),
+    call('c2', 'propose_flight', {
+      originAirportId: '1',
+      destinationAirportId: '2',
+      airline: 'AY',
+      flightNumber: '1337',
+      flightRef: '1',
+    }),
+  ]);
+
+  const result = await resolveFlightDraft(deps({ llm, provider }), 'AY1337 HEL to LHR on 30 Aug');
+  expect(result.status).toBe('draft');
+  if (result.status !== 'draft') return;
+  expect(result.draft.matchedFlight).toBe(true);
+  // Human-readable number kept, but the verified time comes from the candidate.
+  expect(result.draft.airline).toBe('AY');
+  expect(result.draft.flightNumber).toBe('1337');
+  expect(result.draft.departureLocal).toBe('2026-08-30T16:30');
+});
+
 test('returns a question when the model asks for more detail', async () => {
   const llm = new ScriptedLlm([{ role: 'assistant', content: 'Which city did you fly from?' }]);
   const result = await resolveFlightDraft(deps({ llm }), 'a flight yesterday');

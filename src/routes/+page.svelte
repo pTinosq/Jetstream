@@ -74,6 +74,8 @@
   let aiError = $state<string | null>(null);
   let aiMessage = $state<string | null>(null);
   let aiNote = $state<string | null>(null);
+  // null = no result yet; true = grounded on a tracked flight; false = from text.
+  let aiMatched = $state<boolean | null>(null);
 
   const canSearch = $derived(origin !== null && destination !== null && searchDate !== '');
 
@@ -152,6 +154,7 @@
     aircraftPhoto = draft.photoUrl;
     aircraftLookup = draft.aircraftType !== null ? 'done' : 'idle';
     aiNote = draft.note;
+    aiMatched = draft.matchedFlight;
     if (draft.departureLocal !== null) searchDate = draft.departureLocal.slice(0, 10);
   }
 
@@ -170,6 +173,7 @@
     aiError = null;
     aiMessage = null;
     aiNote = null;
+    aiMatched = null;
     try {
       const response = await fetch('/api/assistant', {
         method: 'POST',
@@ -245,6 +249,17 @@
         >
           {aiBusy ? 'Reading…' : 'Fill from text'}
         </button>
+        {#if aiMatched === true}
+          <span
+            class="rounded-full bg-emerald-500/12 px-2.5 py-1 text-xs font-medium text-emerald-700"
+          >
+            ✓ Matched to a tracked flight
+          </span>
+        {:else if aiMatched === false}
+          <span class="rounded-full bg-amber-500/12 px-2.5 py-1 text-xs font-medium text-amber-800">
+            From your text — not verified against tracking
+          </span>
+        {/if}
         {#if aiMessage !== null}
           <p class="text-sm text-amber-700">{aiMessage}</p>
         {/if}
