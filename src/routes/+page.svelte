@@ -155,6 +155,15 @@
     if (draft.departureLocal !== null) searchDate = draft.departureLocal.slice(0, 10);
   }
 
+  // Enter submits (like a chat box); Shift+Enter inserts a newline. Pasting is
+  // unaffected — it never fires an Enter keydown.
+  function onAiKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void runAssistant();
+    }
+  }
+
   async function runAssistant(): Promise<void> {
     if (aiText.trim() === '' || aiBusy) return;
     aiBusy = true;
@@ -217,11 +226,13 @@
       >
       <p class="mt-1 mb-2.5 text-xs leading-relaxed text-ink-mute">
         e.g. “Finnair flight on the 18th of Sept 26, landed Helsinki 12:00 local” — or paste a
-        booking confirmation email.
+        booking confirmation email. Press <kbd class="font-mono">Enter</kbd> to fill,
+        <kbd class="font-mono">Shift</kbd>+<kbd class="font-mono">Enter</kbd> for a new line.
       </p>
       <textarea
         id="aiText"
         bind:value={aiText}
+        onkeydown={onAiKeydown}
         rows="3"
         placeholder="Type the flight details, or paste an email…"
         class="field"></textarea>
